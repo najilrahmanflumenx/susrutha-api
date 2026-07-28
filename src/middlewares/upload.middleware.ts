@@ -3,21 +3,31 @@ import path from 'path';
 import fs from 'fs';
 import { ApiError } from '../utils/ApiError';
 
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+const isVercel = Boolean(process.env.VERCEL);
+const uploadDir = isVercel ? '/tmp/uploads' : path.join(process.cwd(), 'uploads');
+
+if (!isVercel) {
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+  } catch (e) {
+    // Ignore filesystem creation errors on read-only environments
+  }
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-  },
-});
+const storage = isVercel
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (_req, _file, cb) => {
+        cb(null, uploadDir);
+      },
+      filename: (_req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        const ext = path.extname(file.originalname);
+        cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+      },
+    });
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = /jpeg|jpg|png|webp|svg|pdf|doc|docx/;

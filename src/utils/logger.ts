@@ -1,4 +1,6 @@
 import winston from 'winston';
+import fs from 'fs';
+import path from 'path';
 
 const levels = {
   error: 0,
@@ -30,12 +32,20 @@ const transports: winston.transport[] = [
   new winston.transports.Console()
 ];
 
-// File logging is only enabled in non-serverless environments (Vercel has a read-only filesystem)
+// File logging is only enabled in local non-serverless environments
 if (!process.env.VERCEL) {
-  transports.push(
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  );
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    transports.push(
+      new winston.transports.File({ filename: path.join(logsDir, 'error.log'), level: 'error' }),
+      new winston.transports.File({ filename: path.join(logsDir, 'combined.log') })
+    );
+  } catch (err) {
+    // Fall back cleanly to console logging on read-only environments
+  }
 }
 
 export const logger = winston.createLogger({
