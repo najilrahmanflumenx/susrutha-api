@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FAQ = void 0;
+const mongoose_1 = require("mongoose");
+const FAQSchema = new mongoose_1.Schema({
+    question: { type: String, required: true, trim: true },
+    answer: { type: String, required: true },
+    category: {
+        type: String,
+        enum: ['GENERAL', 'PANCHAKARMA', 'ADMISSION', 'INSURANCE', 'TREATMENT'],
+        default: 'GENERAL',
+    },
+    sortOrder: { type: Number, default: 0 },
+    status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
+    isDeleted: { type: Boolean, default: false },
+}, { timestamps: true });
+exports.FAQ = (0, mongoose_1.model)('FAQ', FAQSchema);
