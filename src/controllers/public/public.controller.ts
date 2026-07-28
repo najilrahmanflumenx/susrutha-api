@@ -229,7 +229,8 @@ export class PublicController {
 
       const doctors = await Doctor.find(query)
         .populate('departmentId', 'title slug')
-        .select('name slug designation qualifications experienceYears photo bio specialties languagesSpoken availability consultationFee isDirector isFeatured');
+        .populate('assignedBranchIds', 'name code type')
+        .select('name slug designation qualifications experienceYears photo bio specialties languagesSpoken availability consultationFee isDirector isFeatured assignedBranchIds departmentId');
 
       return res.status(200).json(ApiResponse.success(doctors.length ? doctors : FALLBACK_DOCTORS, 'Public doctors fetched successfully'));
     } catch (err) {
