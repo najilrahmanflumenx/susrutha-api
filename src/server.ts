@@ -29,14 +29,10 @@ app.use(morgan('combined', { stream: { write: (message) => logger.info(message.t
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   try {
     await connectDB();
-    next();
   } catch (err: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Database Connection Error: Unable to connect to MongoDB Atlas. Ensure MONGODB_URI is correctly configured in Vercel environment variables and 0.0.0.0/0 is allowed in Atlas Network Access.',
-      error: err.message,
-    });
+    logger.warn(`MongoDB Connection Warning: ${err.message}`);
   }
+  next();
 });
 
 // Serve Uploaded Files Statically
