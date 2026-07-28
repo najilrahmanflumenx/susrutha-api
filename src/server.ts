@@ -84,9 +84,11 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-app.listen(PORT, () => {
-  logger.info(`🚀 SUSRUTHA Enterprise Backend Engine running on http://localhost:${PORT}`);
-  logger.info(`📖 Interactive Swagger Documentation: http://localhost:${PORT}/api/v1/docs`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    logger.info(`🚀 SUSRUTHA Enterprise Backend Engine running on http://localhost:${PORT}`);
+    logger.info(`📖 Interactive Swagger Documentation: http://localhost:${PORT}/api/v1/docs`);
+  });
+}
 
 export default app;
