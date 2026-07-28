@@ -44,6 +44,11 @@ try {
 // OpenAPI / Swagger UI Setup
 setupSwagger(app as any);
 
+// Health Check Endpoint for Render / Load Balancers
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'OK', uptime: process.uptime(), timestamp: new Date() });
+});
+
 // Root Welcome Endpoint
 app.get('/', (req: Request, res: Response) => {
   res.json({

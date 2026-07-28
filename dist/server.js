@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
 const logger_1 = require("./utils/logger");
 const PORT = process.env.PORT || 5000;
-app_1.default.listen(PORT, () => {
-    logger_1.logger.info(`🚀 SUSRUTHA Enterprise Backend Engine running on http://localhost:${PORT}`);
-    logger_1.logger.info(`📖 Interactive Swagger Documentation: http://localhost:${PORT}/api/v1/docs`);
+app_1.default.listen(Number(PORT), '0.0.0.0', () => {
+    logger_1.logger.info(`🚀 SUSRUTHA Enterprise Backend Engine running on 0.0.0.0:${PORT}`);
+    logger_1.logger.info(`📖 Interactive Swagger Documentation: /api/v1/docs`);
 });
 exports.default = app_1.default;
