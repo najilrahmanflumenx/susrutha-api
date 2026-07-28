@@ -18,15 +18,26 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
-connectDB();
-
 // Global Middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
+// Ensure MongoDB connection per request (Serverless safe)
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: 'Database Connection Error: Unable to connect to MongoDB Atlas. Ensure MONGODB_URI is correctly configured in Vercel environment variables and 0.0.0.0/0 is allowed in Atlas Network Access.',
+      error: err.message,
+    });
+  }
+});
 
 // Serve Uploaded Files Statically
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
