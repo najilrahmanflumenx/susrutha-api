@@ -30,18 +30,19 @@ const storage = isVercel
     });
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedTypes = /jpeg|jpg|png|webp|svg|pdf|doc|docx/;
+  const allowedTypes = /jpeg|jpg|png|webp|svg|gif|mp4|webm|mov|mkv|avi|pdf|doc|docx/;
   const extName = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimeType = allowedTypes.test(file.mimetype);
+  const mimeType = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/');
 
   if (extName && mimeType) {
     return cb(null, true);
   }
-  cb(new ApiError(400, 'Invalid file type. Allowed: JPEG, PNG, WEBP, SVG, PDF, DOC, DOCX'));
+  cb(new ApiError(400, 'Invalid file type. Allowed formats: Images (JPEG, PNG, WEBP, SVG, GIF), Videos (MP4, WEBM, MOV, MKV, AVI), Documents (PDF, DOC, DOCX)'));
 };
 
 export const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max limit (allows video uploads)
   fileFilter,
 });
+

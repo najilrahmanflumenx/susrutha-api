@@ -4,17 +4,22 @@ export interface ITreatment extends Document {
   title: string;
   slug: string;
   category: string; // e.g. Panchakarma, Kizhi, Dhara, Vasthi, Wellness
+  malayalam?: string;
   shortDescription: string;
   fullDescription: string;
   coverImage?: string;
-  galleryImages: string[];
+  galleryImages?: string[];
   durationMinutes: number;
   recommendedDays: number;
-  indications: string[];
-  benefits: string[];
-  contraindications: string[];
-  procedureSteps: string[];
-  doctorIds: mongoose.Types.ObjectId[];
+  indications?: string[];
+  benefits?: string[];
+  contraindications?: string[];
+  procedureSteps?: any[];
+  preparation?: string[];
+  aftercare?: string[];
+  safety?: string[];
+  faqs?: Array<{ q?: string; a?: string; question?: string; answer?: string }>;
+  doctorIds?: mongoose.Types.ObjectId[];
   assignedBranchIds?: mongoose.Types.ObjectId[];
   isFeatured: boolean;
   status: 'draft' | 'published' | 'archived';
@@ -35,6 +40,7 @@ const TreatmentSchema = new Schema<ITreatment>(
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, index: true },
     category: { type: String, default: 'Panchakarma', trim: true },
+    malayalam: { type: String, default: '' },
     shortDescription: { type: String, required: true },
     fullDescription: { type: String, required: true },
     coverImage: { type: String, default: '' },
@@ -44,7 +50,11 @@ const TreatmentSchema = new Schema<ITreatment>(
     indications: [{ type: String }],
     benefits: [{ type: String }],
     contraindications: [{ type: String }],
-    procedureSteps: [{ type: String }],
+    procedureSteps: { type: Schema.Types.Mixed, default: [] },
+    preparation: [{ type: String }],
+    aftercare: [{ type: String }],
+    safety: [{ type: String }],
+    faqs: { type: Schema.Types.Mixed, default: [] },
     doctorIds: [{ type: Schema.Types.ObjectId, ref: 'Doctor' }],
     assignedBranchIds: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
     isFeatured: { type: Boolean, default: false },

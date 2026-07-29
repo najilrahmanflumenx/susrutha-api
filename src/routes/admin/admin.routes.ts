@@ -175,7 +175,8 @@ router.post('/upload', upload.single('file'), asyncHandler(async (req: Request, 
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
-  const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const host = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}`;
+  const fileUrl = `${host}/uploads/${req.file.filename}`;
   const mediaRecord = await MediaFile.create({
     filename: req.file.filename,
     originalName: req.file.originalname,
