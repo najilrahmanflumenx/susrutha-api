@@ -4,8 +4,33 @@ import { ApiResponse } from '../utils/ApiResponse';
 
 export class BlogController {
   static async getAllBlogs(req: Request, res: Response) {
-    const blogs = await Blog.find({ isDeleted: false });
-    return res.status(200).json(ApiResponse.success(blogs, 'Blogs fetched successfully'));
+    const { branchId, q, page: reqPage, limit: reqLimit } = req.query;
+    const query: any = { isDeleted: false };
+    if (branchId && branchId !== 'ALL') query.branchId = branchId;
+    if (q) {
+      query.$or = [
+        { title: { $regex: q as string, $options: 'i' } },
+        { excerpt: { $regex: q as string, $options: 'i' } },
+        { category: { $regex: q as string, $options: 'i' } },
+      ];
+    }
+
+    const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
+    const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+    const skip = (page - 1) * limit;
+
+    const [blogs, total] = await Promise.all([
+      Blog.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Blog.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      statusCode: 200,
+      success: true,
+      message: 'Blogs fetched successfully',
+      data: blogs,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
+    });
   }
 
   static async createBlog(req: Request, res: Response) {

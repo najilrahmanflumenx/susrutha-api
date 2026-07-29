@@ -4,8 +4,36 @@ import { ApiResponse } from '../utils/ApiResponse';
 
 export class DepartmentController {
   static async getAllDepartments(req: Request, res: Response) {
-    const departments = await Department.find({ isDeleted: false }).populate('assignedBranchIds', 'name code');
-    return res.status(200).json(ApiResponse.success(departments, 'Departments fetched successfully'));
+    const { q, page: reqPage, limit: reqLimit } = req.query;
+    const query: any = { isDeleted: false };
+    if (q) {
+      query.$or = [
+        { title: { $regex: q as string, $options: 'i' } },
+        { code: { $regex: q as string, $options: 'i' } },
+        { description: { $regex: q as string, $options: 'i' } },
+      ];
+    }
+
+    const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
+    const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+    const skip = (page - 1) * limit;
+
+    const [departments, total] = await Promise.all([
+      Department.find(query)
+        .populate('assignedBranchIds', 'name code')
+        .sort({ sortOrder: 1, title: 1 })
+        .skip(skip)
+        .limit(limit),
+      Department.countDocuments(query),
+    ]);
+
+    return res.status(200).json({
+      statusCode: 200,
+      success: true,
+      message: 'Departments fetched successfully',
+      data: departments,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
+    });
   }
 
   static async createDepartment(req: Request, res: Response) {

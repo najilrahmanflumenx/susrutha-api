@@ -3,32 +3,36 @@ import Treatment from '../models/Treatment.model';
 
 export const getTreatments = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { category, search, status, page = 1, limit = 50 } = req.query;
+    const { category, search, q, status, page = 1, limit = 10 } = req.query;
     const filter: any = { isDeleted: false };
     
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (search) {
+
+    const searchTerm = (search || q) as string;
+    if (searchTerm && searchTerm.trim()) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { shortDescription: { $regex: search, $options: 'i' } },
+        { title: { $regex: searchTerm.trim(), $options: 'i' } },
+        { shortDescription: { $regex: searchTerm.trim(), $options: 'i' } },
       ];
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    const limitNum = Number(limit) || 10;
+    const pageNum = Number(page) || 1;
+    const skip = (pageNum - 1) * limitNum;
     const [treatments, total] = await Promise.all([
       Treatment.find(filter)
         .populate('doctorIds', 'name designation photo slug')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Number(limit)),
+        .limit(limitNum),
       Treatment.countDocuments(filter),
     ]);
 
     res.status(200).json({
       success: true,
       data: treatments,
-      meta: { total, page: Number(page), limit: Number(limit) },
+      meta: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) || 1 },
     });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
