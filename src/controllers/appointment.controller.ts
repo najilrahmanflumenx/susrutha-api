@@ -36,7 +36,7 @@ export class AppointmentController {
         ];
       }
 
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 

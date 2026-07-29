@@ -200,22 +200,47 @@ export class PublicController {
   // GET /api/v1/public/branches
   static async getBranches(req: Request, res: Response) {
     try {
-      const { limit: reqLimit, page: reqPage } = req.query;
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const { type, limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const branches = await Branch.find({ status: 'ACTIVE' }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(branches.length ? branches : FALLBACK_BRANCHES, 'Public branches fetched successfully'));
+      let query: any = { status: 'ACTIVE' };
+      if (type && type !== 'ALL') {
+        query.type = type;
+      }
+
+      const [branches, total] = await Promise.all([
+        Branch.find(query).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit),
+        Branch.countDocuments(query),
+      ]);
+
+      const data = branches.length ? branches : FALLBACK_BRANCHES;
+      const totalCount = total || data.length;
+      return res.status(200).json(
+        ApiResponse.success(data, 'Public branches fetched successfully', {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit) || 1,
+        })
+      );
     } catch (err) {
-      return res.status(200).json(ApiResponse.success(FALLBACK_BRANCHES, 'Fallback branches served'));
+      return res.status(200).json(
+        ApiResponse.success(FALLBACK_BRANCHES, 'Fallback branches served', {
+          total: FALLBACK_BRANCHES.length,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        })
+      );
     }
   }
 
   // GET /api/v1/public/doctors
   static async getDoctors(req: Request, res: Response) {
     try {
-      const { branchCode, limit: reqLimit, page: reqPage } = req.query;
+      const { branchCode, category, search, q, limit: reqLimit, page: reqPage } = req.query;
       let query: any = { status: 'ACTIVE', isDeleted: false };
 
       if (branchCode) {
@@ -225,17 +250,37 @@ export class PublicController {
         }
       }
 
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      if (category && category !== 'ALL') {
+        const dept = await Department.findOne({
+          $or: [{ slug: category }, { title: new RegExp(category as string, 'i') }],
+        });
+        if (dept) {
+          query.departmentId = dept._id;
+        } else {
+          query.specialties = new RegExp(category as string, 'i');
+        }
+      }
+
+      const searchTerm = (search || q) as string;
+      if (searchTerm && searchTerm.trim()) {
+        const regex = new RegExp(searchTerm.trim(), 'i');
+        query.$or = [{ name: regex }, { designation: regex }, { specialties: regex }, { qualifications: regex }];
+      }
+
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const doctors = await Doctor.find(query)
-        .populate('departmentId', 'title slug')
-        .populate('assignedBranchIds', 'name code type')
-        .select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability consultationFee isDirector isFeatured assignedBranchIds departmentId')
-        .sort({ sortOrder: 1, createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+      const [doctors, total] = await Promise.all([
+        Doctor.find(query)
+          .populate('departmentId', 'title slug')
+          .populate('assignedBranchIds', 'name code type')
+          .select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability consultationFee isDirector isFeatured assignedBranchIds departmentId')
+          .sort({ sortOrder: 1, createdAt: -1 })
+          .skip(skip)
+          .limit(limit),
+        Doctor.countDocuments(query),
+      ]);
 
       const mapped = doctors.map((doc: any) => {
         const obj = doc.toObject();
@@ -244,9 +289,25 @@ export class PublicController {
         return obj;
       });
 
-      return res.status(200).json(ApiResponse.success(mapped.length ? mapped : FALLBACK_DOCTORS, 'Public doctors fetched successfully'));
+      const data = mapped.length ? mapped : FALLBACK_DOCTORS;
+      const totalCount = total || data.length;
+      return res.status(200).json(
+        ApiResponse.success(data, 'Public doctors fetched successfully', {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit) || 1,
+        })
+      );
     } catch (err) {
-      return res.status(200).json(ApiResponse.success(FALLBACK_DOCTORS, 'Fallback doctors served'));
+      return res.status(200).json(
+        ApiResponse.success(FALLBACK_DOCTORS, 'Fallback doctors served', {
+          total: FALLBACK_DOCTORS.length,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        })
+      );
     }
   }
 
@@ -488,15 +549,47 @@ export class PublicController {
   // GET /api/v1/public/treatments
   static async getTreatments(req: Request, res: Response) {
     try {
-      const { limit: reqLimit, page: reqPage } = req.query;
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const { category, search, q, limit: reqLimit, page: reqPage } = req.query;
+      let query: any = { status: 'published', isDeleted: false };
+
+      if (category && category !== 'ALL') {
+        query.category = new RegExp(category as string, 'i');
+      }
+
+      const searchTerm = (search || q) as string;
+      if (searchTerm && searchTerm.trim()) {
+        const regex = new RegExp(searchTerm.trim(), 'i');
+        query.$or = [{ title: regex }, { name: regex }, { category: regex }, { shortDescription: regex }];
+      }
+
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(treatments.length ? treatments : FALLBACK_TREATMENTS, 'Public treatments fetched successfully'));
+      const [treatments, total] = await Promise.all([
+        Treatment.find(query).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit),
+        Treatment.countDocuments(query),
+      ]);
+
+      const data = treatments.length ? treatments : FALLBACK_TREATMENTS;
+      const totalCount = total || data.length;
+      return res.status(200).json(
+        ApiResponse.success(data, 'Public treatments fetched successfully', {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit) || 1,
+        })
+      );
     } catch (err) {
-      return res.status(200).json(ApiResponse.success(FALLBACK_TREATMENTS, 'Fallback treatments served'));
+      return res.status(200).json(
+        ApiResponse.success(FALLBACK_TREATMENTS, 'Fallback treatments served', {
+          total: FALLBACK_TREATMENTS.length,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        })
+      );
     }
   }
 
