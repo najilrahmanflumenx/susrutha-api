@@ -24,7 +24,7 @@ import { logger } from '../utils/logger';
 export async function autoSeedSystemData(): Promise<void> {
   try {
     // 1. Ensure Super Admin Role exists
-    let superAdminRole = await Role.findOne({ name: 'SUPER_ADMIN', isDeleted: false });
+    let superAdminRole = await Role.findOne({ name: 'SUPER_ADMIN' });
     if (!superAdminRole) {
       superAdminRole = await Role.create({
         name: 'SUPER_ADMIN',
