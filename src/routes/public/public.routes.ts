@@ -8,6 +8,8 @@ import { getVideos } from '../../controllers/video.controller';
 import { getGalleryAlbums } from '../../controllers/gallery.controller';
 import { getAffiliations } from '../../controllers/affiliation.controller';
 import { asyncHandler } from '../../utils/asyncHandler';
+import { validateBody } from '../../middlewares/validate.middleware';
+import { bookingSchema, leadSchema } from '../../validators/schemas';
 
 const router = Router();
 
@@ -39,8 +41,9 @@ router.get('/videos', asyncHandler(getVideos));
 router.get('/gallery', asyncHandler(getGalleryAlbums));
 router.get('/affiliations', asyncHandler(getAffiliations));
 
-router.post('/appointment', asyncHandler(PublicController.bookAppointment));
-router.post('/contact', asyncHandler(PublicController.submitLead));
+// Form Post Endpoints with Zod Middleware
+router.post('/appointment', validateBody(bookingSchema), asyncHandler(PublicController.bookAppointment));
+router.post('/contact', validateBody(leadSchema), asyncHandler(PublicController.submitLead));
 router.post('/feedback', asyncHandler(PublicController.submitFeedback));
 
 export default router;

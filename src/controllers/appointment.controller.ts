@@ -7,7 +7,7 @@ import { ApiError } from '../utils/ApiError';
 export class AppointmentController {
   public static async getAllAppointments(req: Request, res: Response, next: NextFunction) {
     try {
-      const { branchId, branchCode, doctorId, status, date } = req.query;
+      const { branchId, branchCode, doctorId, status, date, q, page: reqPage, limit: reqLimit } = req.query;
       const query: any = { isDeleted: false };
 
       if (branchId && branchId !== 'ALL') {
@@ -27,14 +27,37 @@ export class AppointmentController {
         endDate.setHours(23, 59, 59, 999);
         query.preferredDate = { $gte: startDate, $lte: endDate };
       }
+      if (q) {
+        query.$or = [
+          { patientName: { $regex: q as string, $options: 'i' } },
+          { patientPhone: { $regex: q as string, $options: 'i' } },
+          { patientEmail: { $regex: q as string, $options: 'i' } },
+          { appointmentNumber: { $regex: q as string, $options: 'i' } },
+        ];
+      }
 
-      const appointments = await Appointment.find(query)
-        .populate('branchId', 'name code type')
-        .populate('departmentId', 'title slug')
-        .populate('doctorId', 'name designation photo')
-        .sort({ preferredDate: -1, createdAt: -1 });
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
 
-      res.status(200).json(new ApiResponse(200, 'Appointments list fetched', appointments));
+      const [appointments, total] = await Promise.all([
+        Appointment.find(query)
+          .populate('branchId', 'name code type')
+          .populate('departmentId', 'title slug')
+          .populate('doctorId', 'name designation photo')
+          .sort({ preferredDate: -1, createdAt: -1 })
+          .skip(skip)
+          .limit(limit),
+        Appointment.countDocuments(query),
+      ]);
+
+      res.status(200).json({
+        statusCode: 200,
+        success: true,
+        message: 'Appointments list fetched',
+        data: appointments,
+        meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      });
     } catch (error) {
       next(error);
     }

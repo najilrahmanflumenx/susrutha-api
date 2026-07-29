@@ -20,7 +20,7 @@ const MediaFileSchema = new Schema<IMediaFile>(
     filename: { type: String, required: true },
     originalName: { type: String, required: true },
     mimeType: { type: String, required: true },
-    size: { type: Number, required: true },
+    size: { type: Number, default: 0 },
     url: { type: String, required: true },
     publicId: { type: String, default: '' },
     folder: { type: String, default: 'general' },

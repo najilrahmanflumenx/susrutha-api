@@ -25,7 +25,7 @@ export interface INewsEvent extends Document {
 const NewsEventSchema = new Schema<INewsEvent>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     type: {
       type: String,
       enum: ['press_release', 'newspaper_clipping', 'tv_feature', 'event', 'award'],

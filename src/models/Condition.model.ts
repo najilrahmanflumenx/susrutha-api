@@ -31,7 +31,7 @@ export interface ICondition extends Document {
 const ConditionSchema = new Schema<ICondition>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: { type: String, default: 'General', trim: true },
     shortDescription: { type: String, required: true },
     fullDescription: { type: String, required: true },

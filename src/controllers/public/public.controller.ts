@@ -19,8 +19,8 @@ import GalleryAlbum from '../../models/GalleryAlbum.model';
 import Affiliation from '../../models/Affiliation.model';
 import { ApiResponse } from '../../utils/ApiResponse';
 import { ApiError } from '../../utils/ApiError';
+import { InputSanitizer } from '../../utils/sanitizer';
 
-// Static Fallback Data for High Availability
 const FALLBACK_BRANCHES = [
   {
     _id: 'ktk-main-branch',
@@ -60,7 +60,8 @@ const FALLBACK_DOCTORS = [
     designation: 'Chief Medical Officer & Senior Physician',
     qualifications: 'BAMS, MD (Ayurveda)',
     experienceYears: 24,
-    photoUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d',
+    photoUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&auto=format&fit=crop&q=80',
+    photo: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&auto=format&fit=crop&q=80',
     bio: 'Renowned Ayurvedic physician with over 24 years of clinical experience in classical Panchakarma, severe degenerative spine disorders, and chronic arthritis.',
     consultationFee: 500,
     specialties: ['Panchakarma Detoxification', 'Spine Disc Herniation', 'Rheumatoid Arthritis'],
@@ -76,7 +77,8 @@ const FALLBACK_DOCTORS = [
     designation: 'Senior Consultant Physician',
     qualifications: 'BAMS, MS (Ayurveda)',
     experienceYears: 18,
-    photoUrl: 'https://images.unsplash.com/photo-1594824813570-78a295000527',
+    photoUrl: 'https://images.unsplash.com/photo-1594824813570-78a295000527?w=600&auto=format&fit=crop&q=80',
+    photo: 'https://images.unsplash.com/photo-1594824813570-78a295000527?w=600&auto=format&fit=crop&q=80',
     bio: 'Expert in Gynaecology, Infertility, PCOS management, Chronic Psoriasis, and Lifestyle Metabolic Disorders.',
     consultationFee: 400,
     specialties: ['PCOS & Women Health', 'Psoriasis & Skin Care', 'Metabolic Disorders'],
@@ -102,20 +104,6 @@ const FALLBACK_TREATMENTS = [
     isFeatured: true,
     status: 'published',
   },
-  {
-    _id: 'tr-shirodhara',
-    title: 'Shirodhara (Mind Calming Oil Stream Therapy)',
-    slug: 'shirodhara-mind-calming-therapy',
-    category: 'Panchakarma',
-    shortDescription: 'Continuous rhythm pour of warm medicated oil across forehead for nerve relaxation.',
-    fullDescription: 'Profound nervous system relaxation procedure highly recommended for anxiety, insomnia, hypertension, and stress.',
-    durationMinutes: 45,
-    recommendedDays: 7,
-    indications: ['Insomnia', 'Anxiety & Depression', 'Hypertension', 'Migraine'],
-    benefits: ['Calms the central nervous system', 'Improves sleep quality', 'Relieves chronic headaches'],
-    isFeatured: true,
-    status: 'published',
-  },
 ];
 
 const FALLBACK_CONDITIONS = [
@@ -131,39 +119,34 @@ const FALLBACK_CONDITIONS = [
     isFeatured: true,
     status: 'published',
   },
-  {
-    _id: 'cond-spondylosis',
-    title: 'Cervical & Lumbar Spondylosis (Disc Bulge)',
-    slug: 'cervical-lumbar-spondylosis-disc-bulge',
-    category: 'Spine Care',
-    shortDescription: 'Targeted spine therapies for compressed nerve roots, sciatica, and chronic neck & back stiffness.',
-    fullDescription: 'Specialized Kadi Vasthi and Griva Vasthi procedures with medicated herbal oils to nourish spinal discs and relieve sciatica.',
-    ayurvedicRootCause: 'Vata Dosha Imbalance & Asthi-Majja Dhatu Kshaya',
-    symptoms: ['Radiating leg or arm pain', 'Numbness in fingers and toes', 'Lower back stiffness'],
-    isFeatured: true,
-    status: 'published',
-  },
 ];
 
 export class PublicController {
-  // GET /api/v1/public/home - Aggregated public homepage data
+  // GET /api/v1/public/home - Aggregated public homepage data with limits
   static async getHome(req: Request, res: Response) {
     try {
-      const branches = await Branch.find({ status: 'ACTIVE', isDeleted: false }).select('name code type tagline address contact opdTimings bedCapacity features isMainBranch');
-      const doctors = await Doctor.find({ status: 'ACTIVE', isDeleted: false }).populate('departmentId', 'title slug').select('name slug designation qualifications experienceYears photo bio specialties languagesSpoken availability isDirector isFeatured');
-      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('title slug code tagline overview icon photo isFeatured');
-      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('title slug subtitle durationDays overview inclusions targetAilments price isFeatured');
-      const testimonials = await Testimonial.find({ status: 'ACTIVE', isFeatured: true, isDeleted: false }).select('patientName patientLocation treatmentReceived rating reviewText');
-      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('question answer category');
-      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription isFeatured');
-      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription durationMinutes isFeatured');
+      const branches = await Branch.find({ status: 'ACTIVE', isDeleted: false }).select('name code type tagline address contact opdTimings bedCapacity features isMainBranch coverImage').limit(10);
+      const doctors = await Doctor.find({ status: 'ACTIVE', isDeleted: false }).populate('departmentId', 'title slug').select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability isDirector isFeatured').limit(15);
+      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('title slug code tagline overview icon image photo isFeatured').limit(12);
+      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('title slug subtitle durationDays overview inclusions targetAilments price isFeatured bannerImage').limit(10);
+      const testimonials = await Testimonial.find({ status: 'ACTIVE', isFeatured: true, isDeleted: false }).select('patientName patientLocation treatmentReceived rating reviewText patientPhoto videoUrl').limit(10);
+      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('question answer category').limit(10);
+      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription coverImage isFeatured').limit(12);
+      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription durationMinutes coverImage isFeatured').limit(12);
+
+      const mappedDoctors = doctors.map((doc: any) => {
+        const obj = doc.toObject();
+        if (!obj.photo && obj.photoUrl) obj.photo = obj.photoUrl;
+        if (!obj.photoUrl && obj.photo) obj.photoUrl = obj.photo;
+        return obj;
+      });
 
       return res.status(200).json(
         ApiResponse.success({
           hospitalName: 'SUSRUTHA Ayurvedhik Hospital',
           tagline: 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
           branches: branches.length ? branches : FALLBACK_BRANCHES,
-          doctors: doctors.length ? doctors : FALLBACK_DOCTORS,
+          doctors: mappedDoctors.length ? mappedDoctors : FALLBACK_DOCTORS,
           departments,
           packages,
           testimonials,
@@ -207,7 +190,12 @@ export class PublicController {
   // GET /api/v1/public/branches
   static async getBranches(req: Request, res: Response) {
     try {
-      const branches = await Branch.find({ status: 'ACTIVE' }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const branches = await Branch.find({ status: 'ACTIVE' }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(branches.length ? branches : FALLBACK_BRANCHES, 'Public branches fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success(FALLBACK_BRANCHES, 'Fallback branches served'));
@@ -217,8 +205,8 @@ export class PublicController {
   // GET /api/v1/public/doctors
   static async getDoctors(req: Request, res: Response) {
     try {
-      const { branchCode } = req.query;
-      let query: any = { status: 'ACTIVE' };
+      const { branchCode, limit: reqLimit, page: reqPage } = req.query;
+      let query: any = { status: 'ACTIVE', isDeleted: false };
 
       if (branchCode) {
         const branch = await Branch.findOne({ code: (branchCode as string).toUpperCase() });
@@ -227,12 +215,26 @@ export class PublicController {
         }
       }
 
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
       const doctors = await Doctor.find(query)
         .populate('departmentId', 'title slug')
         .populate('assignedBranchIds', 'name code type')
-        .select('name slug designation qualifications experienceYears photo bio specialties languagesSpoken availability consultationFee isDirector isFeatured assignedBranchIds departmentId');
+        .select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability consultationFee isDirector isFeatured assignedBranchIds departmentId')
+        .sort({ sortOrder: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
 
-      return res.status(200).json(ApiResponse.success(doctors.length ? doctors : FALLBACK_DOCTORS, 'Public doctors fetched successfully'));
+      const mapped = doctors.map((doc: any) => {
+        const obj = doc.toObject();
+        if (!obj.photo && obj.photoUrl) obj.photo = obj.photoUrl;
+        if (!obj.photoUrl && obj.photo) obj.photoUrl = obj.photo;
+        return obj;
+      });
+
+      return res.status(200).json(ApiResponse.success(mapped.length ? mapped : FALLBACK_DOCTORS, 'Public doctors fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success(FALLBACK_DOCTORS, 'Fallback doctors served'));
     }
@@ -244,7 +246,12 @@ export class PublicController {
       const doctor = await Doctor.findOne({ slug: req.params.slug, status: 'ACTIVE', isDeleted: false })
         .populate('departmentId', 'title slug')
         .populate('assignedBranchIds', 'name code address');
-      if (doctor) return res.status(200).json(ApiResponse.success(doctor, 'Doctor fetched successfully'));
+      if (doctor) {
+        const obj = doctor.toObject();
+        if (!obj.photo && obj.photoUrl) obj.photo = obj.photoUrl;
+        if (!obj.photoUrl && obj.photo) obj.photoUrl = obj.photo;
+        return res.status(200).json(ApiResponse.success(obj, 'Doctor fetched successfully'));
+      }
     } catch (err) {}
     const fallback = FALLBACK_DOCTORS.find((d) => d.slug === req.params.slug) || FALLBACK_DOCTORS[0];
     return res.status(200).json(ApiResponse.success(fallback, 'Doctor fetched successfully'));
@@ -253,7 +260,12 @@ export class PublicController {
   // GET /api/v1/public/departments
   static async getDepartments(req: Request, res: Response) {
     try {
-      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(departments, 'Public departments fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Departments fetched successfully'));
@@ -263,7 +275,12 @@ export class PublicController {
   // GET /api/v1/public/packages
   static async getPackages(req: Request, res: Response) {
     try {
-      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(packages, 'Public packages fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Packages fetched successfully'));
@@ -282,7 +299,12 @@ export class PublicController {
   // GET /api/v1/public/blogs
   static async getBlogs(req: Request, res: Response) {
     try {
-      const blogs = await Blog.find({ status: 'PUBLISHED', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const blogs = await Blog.find({ status: 'PUBLISHED', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(blogs, 'Public blogs fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Blogs fetched successfully'));
@@ -293,7 +315,7 @@ export class PublicController {
   static async getBlogBySlug(req: Request, res: Response) {
     try {
       const blog = await Blog.findOne({ slug: req.params.slug, status: 'PUBLISHED', isDeleted: false });
-      if (blog) return res.status(200).json(ApiResponse.success(blog, 'Blog fetched successfully'));
+      if (blog) return res.status(200).json(ApiResponse.success(blog, 'Blog article fetched successfully'));
     } catch (err) {}
     throw ApiError.notFound('Blog article not found');
   }
@@ -301,7 +323,12 @@ export class PublicController {
   // GET /api/v1/public/facilities
   static async getFacilities(req: Request, res: Response) {
     try {
-      const facilities = await Infrastructure.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const facilities = await Infrastructure.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(facilities, 'Public facilities fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Facilities fetched successfully'));
@@ -311,7 +338,12 @@ export class PublicController {
   // GET /api/v1/public/testimonials
   static async getTestimonials(req: Request, res: Response) {
     try {
-      const testimonials = await Testimonial.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const testimonials = await Testimonial.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(testimonials, 'Public testimonials fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Testimonials fetched successfully'));
@@ -321,7 +353,12 @@ export class PublicController {
   // GET /api/v1/public/faqs
   static async getFaqs(req: Request, res: Response) {
     try {
-      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(faqs, 'Public FAQs fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'FAQs fetched successfully'));
@@ -330,20 +367,41 @@ export class PublicController {
 
   // POST /api/v1/public/appointment
   static async bookAppointment(req: Request, res: Response) {
-    const { name, phone, email, date, doctorId, branchId, symptoms } = req.body;
+    const { name, phone, email, date, doctorId, branchId, symptoms, timeSlot, preferredTimeSlot } = req.body;
     if (!name || !phone) {
       throw ApiError.badRequest('Name and Phone are required for booking');
     }
 
+    let finalBranchId = branchId;
+    if (!finalBranchId && doctorId) {
+      try {
+        const doc = await Doctor.findById(doctorId);
+        if (doc && doc.assignedBranchIds && doc.assignedBranchIds.length > 0) {
+          finalBranchId = doc.assignedBranchIds[0];
+        }
+      } catch (e) {}
+    }
+    if (!finalBranchId) {
+      try {
+        const defaultBranch = (await Branch.findOne({ isMainBranch: true })) || (await Branch.findOne({ status: 'ACTIVE' }));
+        if (defaultBranch) {
+          finalBranchId = defaultBranch._id;
+        }
+      } catch (e) {}
+    }
+
+    const slot = preferredTimeSlot || timeSlot || '10:00 AM';
     const appointmentNumber = `APT-${Date.now().toString().slice(-6)}`;
+
     const appointment = await Appointment.create({
       appointmentNumber,
       patientName: name,
       patientPhone: phone,
       patientEmail: email || '',
       preferredDate: date ? new Date(date) : new Date(),
-      doctorId,
-      branchId,
+      preferredTimeSlot: slot,
+      doctorId: doctorId || undefined,
+      branchId: finalBranchId || undefined,
       symptomsNote: symptoms || '',
       status: 'PENDING',
     });
@@ -353,7 +411,7 @@ export class PublicController {
 
   // POST /api/v1/public/contact
   static async submitLead(req: Request, res: Response) {
-    let { name, phone, email, subject, message, branchId } = req.body;
+    const { name, phone, email, subject, message, branchId } = req.body;
     if (!name || !phone) {
       throw ApiError.badRequest('Name and Phone are required');
     }
@@ -393,7 +451,12 @@ export class PublicController {
   // GET /api/v1/public/conditions
   static async getConditions(req: Request, res: Response) {
     try {
-      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(conditions.length ? conditions : FALLBACK_CONDITIONS, 'Public conditions fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success(FALLBACK_CONDITIONS, 'Fallback conditions served'));
@@ -415,7 +478,12 @@ export class PublicController {
   // GET /api/v1/public/treatments
   static async getTreatments(req: Request, res: Response) {
     try {
-      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(treatments.length ? treatments : FALLBACK_TREATMENTS, 'Public treatments fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success(FALLBACK_TREATMENTS, 'Fallback treatments served'));
@@ -437,7 +505,12 @@ export class PublicController {
   // GET /api/v1/public/ecosystem
   static async getEcosystemPillars(req: Request, res: Response) {
     try {
-      const pillars = await Ecosystem.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const pillars = await Ecosystem.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(pillars, 'Public ecosystem pillars fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Ecosystem pillars fetched successfully'));
@@ -456,7 +529,12 @@ export class PublicController {
   // GET /api/v1/public/videos
   static async getVideos(req: Request, res: Response) {
     try {
-      const videos = await Video.find({ status: 'published', isDeleted: false }).sort({ sortOrder: 1 }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const videos = await Video.find({ status: 'published', isDeleted: false }).sort({ sortOrder: 1 }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(videos, 'Public videos fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Videos fetched successfully'));
@@ -466,7 +544,12 @@ export class PublicController {
   // GET /api/v1/public/affiliations
   static async getAffiliations(req: Request, res: Response) {
     try {
-      const affiliations = await Affiliation.find({ status: 'published', isDeleted: false }).sort({ sortOrder: 1 }).select('-__v -createdAt -updatedAt -isDeleted');
+      const { limit: reqLimit, page: reqPage } = req.query;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
+
+      const affiliations = await Affiliation.find({ status: 'published', isDeleted: false }).sort({ sortOrder: 1 }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(affiliations, 'Public affiliations fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Affiliations fetched successfully'));

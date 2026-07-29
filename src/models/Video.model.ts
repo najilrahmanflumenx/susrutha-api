@@ -22,7 +22,7 @@ export interface IVideo extends Document {
 const VideoSchema = new Schema<IVideo>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: {
       type: String,
       enum: ['patient_story', 'doctor_talk', 'facility_tour', 'treatment_demo'],

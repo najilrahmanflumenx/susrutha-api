@@ -23,7 +23,7 @@ export interface IEcosystem extends Document {
 const EcosystemSchema = new Schema<IEcosystem>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     pillarType: {
       type: String,
       enum: ['herbal_garden', 'pharmacy_unit', 'research_center', 'academy'],

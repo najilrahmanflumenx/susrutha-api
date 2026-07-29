@@ -13,4 +13,14 @@ export class CarePackageController {
     const pkg = await CarePackage.create(req.body);
     return res.status(201).json(ApiResponse.success(pkg, 'Care package created successfully'));
   }
+
+  static async updatePackage(req: Request, res: Response) {
+    const updated = await CarePackage.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, req.body, { new: true, runValidators: true });
+    return res.status(200).json(ApiResponse.success(updated, 'Care package updated successfully'));
+  }
+
+  static async deletePackage(req: Request, res: Response) {
+    const deleted = await CarePackage.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true }, { new: true });
+    return res.status(200).json(ApiResponse.success(null, 'Care package deleted successfully'));
+  }
 }

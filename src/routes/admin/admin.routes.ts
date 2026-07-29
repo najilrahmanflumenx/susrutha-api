@@ -97,33 +97,51 @@ router.get('/dashboard', asyncHandler(async (req: Request, res: Response) => {
 // Core CMS Entities
 router.get('/branches', asyncHandler(BranchController.getAllBranches));
 router.post('/branches', asyncHandler(BranchController.createBranch));
+router.put('/branches/:id', asyncHandler(BranchController.updateBranch));
+router.delete('/branches/:id', asyncHandler(BranchController.deleteBranch));
 
 router.get('/doctors', asyncHandler(DoctorController.getAllDoctors));
 router.post('/doctors', asyncHandler(DoctorController.createDoctor));
+router.put('/doctors/:id', asyncHandler(DoctorController.updateDoctor));
+router.delete('/doctors/:id', asyncHandler(DoctorController.deleteDoctor));
 
 router.get('/departments', asyncHandler(DepartmentController.getAllDepartments));
 router.post('/departments', asyncHandler(DepartmentController.createDepartment));
+router.put('/departments/:id', asyncHandler(DepartmentController.updateDepartment));
+router.delete('/departments/:id', asyncHandler(DepartmentController.deleteDepartment));
 
 router.get('/appointments', asyncHandler(AppointmentController.getAllAppointments));
 router.post('/appointments', asyncHandler(AppointmentController.createAppointment));
 
 router.get('/packages', asyncHandler(CarePackageController.getAllPackages));
 router.post('/packages', asyncHandler(CarePackageController.createPackage));
+router.put('/packages/:id', asyncHandler(CarePackageController.updatePackage));
+router.delete('/packages/:id', asyncHandler(CarePackageController.deletePackage));
 
 router.get('/infrastructure', asyncHandler(InfrastructureController.getAllInfrastructure));
 router.post('/infrastructure', asyncHandler(InfrastructureController.createFacility));
+router.put('/infrastructure/:id', asyncHandler(InfrastructureController.updateFacility));
+router.delete('/infrastructure/:id', asyncHandler(InfrastructureController.deleteFacility));
 
 router.get('/blogs', asyncHandler(BlogController.getAllBlogs));
 router.post('/blogs', asyncHandler(BlogController.createBlog));
+router.put('/blogs/:id', asyncHandler(BlogController.updateBlog));
+router.delete('/blogs/:id', asyncHandler(BlogController.deleteBlog));
 
 router.get('/leads', asyncHandler(LeadController.getAllLeads));
 router.post('/leads', asyncHandler(LeadController.createLead));
+router.put('/leads/:id', asyncHandler(LeadController.updateLead));
+router.delete('/leads/:id', asyncHandler(LeadController.deleteLead));
 
 router.get('/users', asyncHandler(UserController.getAllUsers));
 router.post('/users', asyncHandler(UserController.createUser));
+router.put('/users/:id', asyncHandler(UserController.updateUser));
+router.delete('/users/:id', asyncHandler(UserController.deleteUser));
 
 router.get('/roles', asyncHandler(RoleController.getAllRoles));
 router.post('/roles', asyncHandler(RoleController.createRole));
+router.put('/roles/:id', asyncHandler(RoleController.updateRole));
+router.delete('/roles/:id', asyncHandler(RoleController.deleteRole));
 
 router.get('/settings', asyncHandler(SettingController.getAllSettings));
 router.post('/settings', asyncHandler(SettingController.updateSetting));
@@ -181,7 +199,7 @@ router.post('/upload', upload.single('file'), asyncHandler(async (req: Request, 
     filename: req.file.filename,
     originalName: req.file.originalname,
     mimeType: req.file.mimetype,
-    fileSize: req.file.size,
+    size: req.file.size || 0,
     url: fileUrl,
     folder: 'general',
   });

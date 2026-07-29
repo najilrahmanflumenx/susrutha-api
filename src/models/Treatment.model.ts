@@ -38,7 +38,7 @@ export interface ITreatment extends Document {
 const TreatmentSchema = new Schema<ITreatment>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: { type: String, default: 'Panchakarma', trim: true },
     malayalam: { type: String, default: '' },
     shortDescription: { type: String, required: true },

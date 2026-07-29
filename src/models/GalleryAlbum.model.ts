@@ -33,7 +33,7 @@ const MediaItemSchema = new Schema<IMediaItem>({
 const GalleryAlbumSchema = new Schema<IGalleryAlbum>(
   {
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: {
       type: String,
       enum: ['infrastructure', 'ayur_village', 'kowdiar_op', 'herbal_garden', 'events', 'treatments'],

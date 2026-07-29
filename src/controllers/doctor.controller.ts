@@ -6,7 +6,7 @@ import { ApiError } from '../utils/ApiError';
 export class DoctorController {
   public static async getAllDoctors(req: Request, res: Response, next: NextFunction) {
     try {
-      const { branchId, departmentId, isDirector } = req.query;
+      const { branchId, departmentId, isDirector, q, page: reqPage, limit: reqLimit } = req.query;
       const query: any = { isDeleted: false };
 
       if (branchId) {
@@ -18,13 +18,36 @@ export class DoctorController {
       if (isDirector !== undefined) {
         query.isDirector = isDirector === 'true';
       }
+      if (q) {
+        query.$or = [
+          { name: { $regex: q as string, $options: 'i' } },
+          { qualifications: { $regex: q as string, $options: 'i' } },
+          { designation: { $regex: q as string, $options: 'i' } },
+          { specialties: { $regex: q as string, $options: 'i' } },
+        ];
+      }
 
-      const doctors = await Doctor.find(query)
-        .populate('departmentId', 'title slug code')
-        .populate('assignedBranchIds', 'name code type')
-        .sort({ sortOrder: 1, name: 1 });
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const page = reqPage ? parseInt(reqPage as string, 10) : 1;
+      const skip = (page - 1) * limit;
 
-      res.status(200).json(new ApiResponse(200, 'Doctors fetched successfully', doctors));
+      const [doctors, total] = await Promise.all([
+        Doctor.find(query)
+          .populate('departmentId', 'title slug code')
+          .populate('assignedBranchIds', 'name code type')
+          .sort({ sortOrder: 1, name: 1 })
+          .skip(skip)
+          .limit(limit),
+        Doctor.countDocuments(query),
+      ]);
+
+      res.status(200).json({
+        statusCode: 200,
+        success: true,
+        message: 'Doctors fetched successfully',
+        data: doctors,
+        meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      });
     } catch (error) {
       next(error);
     }
