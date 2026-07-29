@@ -10,6 +10,7 @@ export interface IDoctor extends Document {
     assignedBranchIds: Schema.Types.ObjectId[];
     bio: string;
     photo?: string;
+    photoUrl?: string;
     consultationFee: number;
     availability: {
         branchId: Schema.Types.ObjectId;

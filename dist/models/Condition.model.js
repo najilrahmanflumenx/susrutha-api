@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const ConditionSchema = new mongoose_1.Schema({
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: { type: String, default: 'General', trim: true },
     shortDescription: { type: String, required: true },
     fullDescription: { type: String, required: true },

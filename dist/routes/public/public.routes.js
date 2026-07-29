@@ -9,6 +9,8 @@ const video_controller_1 = require("../../controllers/video.controller");
 const gallery_controller_1 = require("../../controllers/gallery.controller");
 const affiliation_controller_1 = require("../../controllers/affiliation.controller");
 const asyncHandler_1 = require("../../utils/asyncHandler");
+const validate_middleware_1 = require("../../middlewares/validate.middleware");
+const schemas_1 = require("../../validators/schemas");
 const router = (0, express_1.Router)();
 // Base Route: /api/v1/public
 router.get('/home', (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.getHome));
@@ -35,7 +37,8 @@ router.get('/media', (0, asyncHandler_1.asyncHandler)(newsEvent_controller_1.get
 router.get('/videos', (0, asyncHandler_1.asyncHandler)(video_controller_1.getVideos));
 router.get('/gallery', (0, asyncHandler_1.asyncHandler)(gallery_controller_1.getGalleryAlbums));
 router.get('/affiliations', (0, asyncHandler_1.asyncHandler)(affiliation_controller_1.getAffiliations));
-router.post('/appointment', (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.bookAppointment));
-router.post('/contact', (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.submitLead));
+// Form Post Endpoints with Zod Middleware
+router.post('/appointment', (0, validate_middleware_1.validateBody)(schemas_1.bookingSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.bookAppointment));
+router.post('/contact', (0, validate_middleware_1.validateBody)(schemas_1.leadSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.submitLead));
 router.post('/feedback', (0, asyncHandler_1.asyncHandler)(public_controller_1.PublicController.submitFeedback));
 exports.default = router;

@@ -7,31 +7,35 @@ exports.deleteTreatment = exports.updateTreatment = exports.createTreatment = ex
 const Treatment_model_1 = __importDefault(require("../models/Treatment.model"));
 const getTreatments = async (req, res) => {
     try {
-        const { category, search, status, page = 1, limit = 50 } = req.query;
+        const { category, search, q, status, page = 1, limit = 10 } = req.query;
         const filter = { isDeleted: false };
         if (status)
             filter.status = status;
         if (category)
             filter.category = category;
-        if (search) {
+        const searchTerm = (search || q);
+        if (searchTerm && searchTerm.trim()) {
             filter.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { shortDescription: { $regex: search, $options: 'i' } },
+                { title: { $regex: searchTerm.trim(), $options: 'i' } },
+                { shortDescription: { $regex: searchTerm.trim(), $options: 'i' } },
             ];
         }
-        const skip = (Number(page) - 1) * Number(limit);
+        const isAll = req.query.all === 'true' || limit === '0' || limit === 'all';
+        const limitNum = isAll ? 1000 : Number(limit) || 50;
+        const pageNum = Number(page) || 1;
+        const skip = (pageNum - 1) * limitNum;
         const [treatments, total] = await Promise.all([
             Treatment_model_1.default.find(filter)
                 .populate('doctorIds', 'name designation photo slug')
                 .sort({ createdAt: -1 })
                 .skip(skip)
-                .limit(Number(limit)),
+                .limit(limitNum),
             Treatment_model_1.default.countDocuments(filter),
         ]);
         res.status(200).json({
             success: true,
             data: treatments,
-            meta: { total, page: Number(page), limit: Number(limit) },
+            meta: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) || 1 },
         });
     }
     catch (error) {

@@ -36,8 +36,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const TreatmentSchema = new mongoose_1.Schema({
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: { type: String, default: 'Panchakarma', trim: true },
+    malayalam: { type: String, default: '' },
     shortDescription: { type: String, required: true },
     fullDescription: { type: String, required: true },
     coverImage: { type: String, default: '' },
@@ -47,7 +48,11 @@ const TreatmentSchema = new mongoose_1.Schema({
     indications: [{ type: String }],
     benefits: [{ type: String }],
     contraindications: [{ type: String }],
-    procedureSteps: [{ type: String }],
+    procedureSteps: { type: mongoose_1.Schema.Types.Mixed, default: [] },
+    preparation: [{ type: String }],
+    aftercare: [{ type: String }],
+    safety: [{ type: String }],
+    faqs: { type: mongoose_1.Schema.Types.Mixed, default: [] },
     doctorIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Doctor' }],
     assignedBranchIds: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Branch' }],
     isFeatured: { type: Boolean, default: false },

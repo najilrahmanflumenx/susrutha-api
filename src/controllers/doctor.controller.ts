@@ -27,7 +27,8 @@ export class DoctorController {
         ];
       }
 
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
+      const isAll = req.query.all === 'true' || reqLimit === '0' || reqLimit === 'all';
+      const limit = isAll ? 1000 : reqLimit ? parseInt(reqLimit as string, 10) : 50;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 

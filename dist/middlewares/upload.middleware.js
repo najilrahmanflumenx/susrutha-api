@@ -33,16 +33,16 @@ const storage = isVercel
         },
     });
 const fileFilter = (_req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|webp|svg|pdf|doc|docx/;
+    const allowedTypes = /jpeg|jpg|png|webp|svg|gif|mp4|webm|mov|mkv|avi|pdf|doc|docx/;
     const extName = allowedTypes.test(path_1.default.extname(file.originalname).toLowerCase());
-    const mimeType = allowedTypes.test(file.mimetype);
+    const mimeType = allowedTypes.test(file.mimetype) || file.mimetype.startsWith('video/') || file.mimetype.startsWith('image/');
     if (extName && mimeType) {
         return cb(null, true);
     }
-    cb(new ApiError_1.ApiError(400, 'Invalid file type. Allowed: JPEG, PNG, WEBP, SVG, PDF, DOC, DOCX'));
+    cb(new ApiError_1.ApiError(400, 'Invalid file type. Allowed formats: Images (JPEG, PNG, WEBP, SVG, GIF), Videos (MP4, WEBM, MOV, MKV, AVI), Documents (PDF, DOC, DOCX)'));
 };
 exports.upload = (0, multer_1.default)({
     storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max limit (allows video uploads)
     fileFilter,
 });

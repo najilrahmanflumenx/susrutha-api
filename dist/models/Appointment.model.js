@@ -9,7 +9,7 @@ const AppointmentSchema = new mongoose_1.Schema({
     patientEmail: { type: String, lowercase: true, trim: true },
     patientAge: { type: Number },
     patientGender: { type: String, enum: ['MALE', 'FEMALE', 'OTHER'] },
-    branchId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    branchId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Branch' },
     departmentId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Department' },
     doctorId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Doctor' },
     consultationType: {
@@ -17,8 +17,8 @@ const AppointmentSchema = new mongoose_1.Schema({
         enum: ['OPD_INPERSON', 'IPD_ADMISSION', 'TELE_CONSULTATION'],
         default: 'OPD_INPERSON',
     },
-    preferredDate: { type: Date, required: true },
-    preferredTimeSlot: { type: String, required: true },
+    preferredDate: { type: Date, default: Date.now },
+    preferredTimeSlot: { type: String, default: '10:00 AM' },
     symptomsNote: { type: String },
     status: {
         type: String,

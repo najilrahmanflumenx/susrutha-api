@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const NewsEventSchema = new mongoose_1.Schema({
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     type: {
         type: String,
         enum: ['press_release', 'newspaper_clipping', 'tv_feature', 'event', 'award'],

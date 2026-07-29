@@ -17,7 +17,8 @@ export const getTreatments = async (req: Request, res: Response): Promise<void> 
       ];
     }
 
-    const limitNum = Number(limit) || 10;
+    const isAll = req.query.all === 'true' || limit === '0' || limit === 'all';
+    const limitNum = isAll ? 1000 : Number(limit) || 50;
     const pageNum = Number(page) || 1;
     const skip = (pageNum - 1) * limitNum;
     const [treatments, total] = await Promise.all([

@@ -7,7 +7,7 @@ const ApiError_1 = require("../utils/ApiError");
 class DoctorController {
     static async getAllDoctors(req, res, next) {
         try {
-            const { branchId, departmentId, isDirector } = req.query;
+            const { branchId, departmentId, isDirector, q, page: reqPage, limit: reqLimit } = req.query;
             const query = { isDeleted: false };
             if (branchId) {
                 query.assignedBranchIds = branchId;
@@ -18,11 +18,34 @@ class DoctorController {
             if (isDirector !== undefined) {
                 query.isDirector = isDirector === 'true';
             }
-            const doctors = await Doctor_model_1.Doctor.find(query)
-                .populate('departmentId', 'title slug code')
-                .populate('assignedBranchIds', 'name code type')
-                .sort({ sortOrder: 1, name: 1 });
-            res.status(200).json(new ApiResponse_1.ApiResponse(200, 'Doctors fetched successfully', doctors));
+            if (q) {
+                query.$or = [
+                    { name: { $regex: q, $options: 'i' } },
+                    { qualifications: { $regex: q, $options: 'i' } },
+                    { designation: { $regex: q, $options: 'i' } },
+                    { specialties: { $regex: q, $options: 'i' } },
+                ];
+            }
+            const isAll = req.query.all === 'true' || reqLimit === '0' || reqLimit === 'all';
+            const limit = isAll ? 1000 : reqLimit ? parseInt(reqLimit, 10) : 50;
+            const page = reqPage ? parseInt(reqPage, 10) : 1;
+            const skip = (page - 1) * limit;
+            const [doctors, total] = await Promise.all([
+                Doctor_model_1.Doctor.find(query)
+                    .populate('departmentId', 'title slug code')
+                    .populate('assignedBranchIds', 'name code type')
+                    .sort({ sortOrder: 1, name: 1 })
+                    .skip(skip)
+                    .limit(limit),
+                Doctor_model_1.Doctor.countDocuments(query),
+            ]);
+            res.status(200).json({
+                statusCode: 200,
+                success: true,
+                message: 'Doctors fetched successfully',
+                data: doctors,
+                meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+            });
         }
         catch (error) {
             next(error);

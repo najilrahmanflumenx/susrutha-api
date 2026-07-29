@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const VideoSchema = new mongoose_1.Schema({
     title: { type: String, required: true, trim: true },
-    slug: { type: String, required: true, unique: true, trim: true, index: true },
+    slug: { type: String, required: true, unique: true, trim: true },
     category: {
         type: String,
         enum: ['patient_story', 'doctor_talk', 'facility_tour', 'treatment_demo'],

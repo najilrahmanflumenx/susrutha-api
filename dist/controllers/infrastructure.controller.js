@@ -12,5 +12,13 @@ class InfrastructureController {
         const facility = await Infrastructure_model_1.Infrastructure.create(req.body);
         return res.status(201).json(ApiResponse_1.ApiResponse.success(facility, 'Facility created successfully'));
     }
+    static async updateFacility(req, res) {
+        const updated = await Infrastructure_model_1.Infrastructure.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, req.body, { new: true, runValidators: true });
+        return res.status(200).json(ApiResponse_1.ApiResponse.success(updated, 'Facility updated successfully'));
+    }
+    static async deleteFacility(req, res) {
+        const deleted = await Infrastructure_model_1.Infrastructure.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true }, { new: true });
+        return res.status(200).json(ApiResponse_1.ApiResponse.success(null, 'Facility deleted successfully'));
+    }
 }
 exports.InfrastructureController = InfrastructureController;
