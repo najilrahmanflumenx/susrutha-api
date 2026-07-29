@@ -125,14 +125,22 @@ export class PublicController {
   // GET /api/v1/public/home - Aggregated public homepage data with limits
   static async getHome(req: Request, res: Response) {
     try {
-      const branches = await Branch.find({ status: 'ACTIVE', isDeleted: false }).select('name code type tagline address contact opdTimings bedCapacity features isMainBranch coverImage').limit(10);
-      const doctors = await Doctor.find({ status: 'ACTIVE', isDeleted: false }).populate('departmentId', 'title slug').select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability isDirector isFeatured').limit(15);
-      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('title slug code tagline overview icon image photo isFeatured').limit(12);
-      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('title slug subtitle durationDays overview inclusions targetAilments price isFeatured bannerImage').limit(10);
-      const testimonials = await Testimonial.find({ status: 'ACTIVE', isFeatured: true, isDeleted: false }).select('patientName patientLocation treatmentReceived rating reviewText patientPhoto videoUrl').limit(10);
-      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('question answer category').limit(10);
-      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription coverImage isFeatured').limit(12);
-      const treatments = await Treatment.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription durationMinutes coverImage isFeatured').limit(12);
+      const [branches, doctors, departments, packages, testimonials, faqs, conditions, treatments, settingsList] = await Promise.all([
+        Branch.find({ status: 'ACTIVE', isDeleted: false }).select('name code type tagline address contact opdTimings bedCapacity features isMainBranch coverImage').limit(10),
+        Doctor.find({ status: 'ACTIVE', isDeleted: false }).populate('departmentId', 'title slug').select('name slug designation qualifications experienceYears photo photoUrl bio specialties languagesSpoken availability isDirector isFeatured').limit(15),
+        Department.find({ status: 'ACTIVE', isDeleted: false }).select('title slug code tagline overview icon image photo isFeatured').limit(12),
+        CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('title slug subtitle durationDays overview inclusions targetAilments price isFeatured bannerImage').limit(10),
+        Testimonial.find({ status: 'ACTIVE', isFeatured: true, isDeleted: false }).select('patientName patientLocation treatmentReceived rating reviewText patientPhoto videoUrl').limit(10),
+        FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('question answer category').limit(10),
+        Condition.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription coverImage isFeatured').limit(12),
+        Treatment.find({ status: 'published', isDeleted: false }).select('title slug category shortDescription durationMinutes coverImage isFeatured').limit(12),
+        Setting.find({}),
+      ]);
+
+      const settingsMap: Record<string, any> = {};
+      settingsList.forEach((s) => {
+        settingsMap[s.key] = s.value;
+      });
 
       const mappedDoctors = doctors.map((doc: any) => {
         const obj = doc.toObject();
@@ -143,8 +151,9 @@ export class PublicController {
 
       return res.status(200).json(
         ApiResponse.success({
-          hospitalName: 'SUSRUTHA Ayurvedhik Hospital',
-          tagline: 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
+          hospitalName: settingsMap['GENERAL']?.hospitalName || 'SUSRUTHA Ayurvedhik Hospital',
+          tagline: settingsMap['GENERAL']?.tagline || 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
+          settings: settingsMap,
           branches: branches.length ? branches : FALLBACK_BRANCHES,
           doctors: mappedDoctors.length ? mappedDoctors : FALLBACK_DOCTORS,
           departments,
@@ -160,6 +169,7 @@ export class PublicController {
         ApiResponse.success({
           hospitalName: 'SUSRUTHA Ayurvedhik Hospital',
           tagline: 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
+          settings: {},
           branches: FALLBACK_BRANCHES,
           doctors: FALLBACK_DOCTORS,
           departments: [],
