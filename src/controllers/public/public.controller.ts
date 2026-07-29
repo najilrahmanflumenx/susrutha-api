@@ -215,7 +215,7 @@ export class PublicController {
         Branch.countDocuments(query),
       ]);
 
-      const data = branches.length ? branches : FALLBACK_BRANCHES;
+      const data = branches;
       const totalCount = total || data.length;
       return res.status(200).json(
         ApiResponse.success(data, 'Public branches fetched successfully', {
@@ -227,8 +227,8 @@ export class PublicController {
       );
     } catch (err) {
       return res.status(200).json(
-        ApiResponse.success(FALLBACK_BRANCHES, 'Fallback branches served', {
-          total: FALLBACK_BRANCHES.length,
+        ApiResponse.success([], 'Public branches fetched successfully', {
+          total: 0,
           page: 1,
           limit: 10,
           totalPages: 1,
@@ -289,7 +289,7 @@ export class PublicController {
         return obj;
       });
 
-      const data = mapped.length ? mapped : FALLBACK_DOCTORS;
+      const data = mapped;
       const totalCount = total || data.length;
       return res.status(200).json(
         ApiResponse.success(data, 'Public doctors fetched successfully', {
@@ -301,8 +301,8 @@ export class PublicController {
       );
     } catch (err) {
       return res.status(200).json(
-        ApiResponse.success(FALLBACK_DOCTORS, 'Fallback doctors served', {
-          total: FALLBACK_DOCTORS.length,
+        ApiResponse.success([], 'Public doctors fetched successfully', {
+          total: 0,
           page: 1,
           limit: 10,
           totalPages: 1,
@@ -523,14 +523,34 @@ export class PublicController {
   static async getConditions(req: Request, res: Response) {
     try {
       const { limit: reqLimit, page: reqPage } = req.query;
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const conditions = await Condition.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(conditions.length ? conditions : FALLBACK_CONDITIONS, 'Public conditions fetched successfully'));
+      const [conditions, total] = await Promise.all([
+        Condition.find({ status: 'published', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit),
+        Condition.countDocuments({ status: 'published', isDeleted: false }),
+      ]);
+
+      const data = conditions;
+      const totalCount = total || data.length;
+      return res.status(200).json(
+        ApiResponse.success(data, 'Public conditions fetched successfully', {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit) || 1,
+        })
+      );
     } catch (err) {
-      return res.status(200).json(ApiResponse.success(FALLBACK_CONDITIONS, 'Fallback conditions served'));
+      return res.status(200).json(
+        ApiResponse.success([], 'Public conditions fetched successfully', {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        })
+      );
     }
   }
 
@@ -571,7 +591,7 @@ export class PublicController {
         Treatment.countDocuments(query),
       ]);
 
-      const data = treatments.length ? treatments : FALLBACK_TREATMENTS;
+      const data = treatments;
       const totalCount = total || data.length;
       return res.status(200).json(
         ApiResponse.success(data, 'Public treatments fetched successfully', {
@@ -583,8 +603,8 @@ export class PublicController {
       );
     } catch (err) {
       return res.status(200).json(
-        ApiResponse.success(FALLBACK_TREATMENTS, 'Fallback treatments served', {
-          total: FALLBACK_TREATMENTS.length,
+        ApiResponse.success([], 'Public treatments fetched successfully', {
+          total: 0,
           page: 1,
           limit: 10,
           totalPages: 1,
