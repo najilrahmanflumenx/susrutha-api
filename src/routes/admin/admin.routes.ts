@@ -116,6 +116,7 @@ router.put('/departments/:id', asyncHandler(DepartmentController.updateDepartmen
 router.delete('/departments/:id', asyncHandler(DepartmentController.deleteDepartment));
 
 router.get('/appointments', asyncHandler(AppointmentController.getAllAppointments));
+router.get('/appointments/:id', asyncHandler(AppointmentController.getAppointmentById));
 router.post('/appointments', asyncHandler(AppointmentController.createAppointment));
 router.put('/appointments/:id', asyncHandler(AppointmentController.updateAppointment));
 router.delete('/appointments/:id', asyncHandler(AppointmentController.deleteAppointment));

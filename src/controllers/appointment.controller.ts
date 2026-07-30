@@ -63,6 +63,20 @@ export class AppointmentController {
     }
   }
 
+  public static async getAppointmentById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const appointment = await Appointment.findOne({ _id: req.params.id, isDeleted: false })
+        .populate('branchId', 'name code address type')
+        .populate('departmentId', 'title slug')
+        .populate('doctorId', 'name designation photo specialties');
+
+      if (!appointment) throw new ApiError(404, 'Appointment not found');
+      res.status(200).json(new ApiResponse(200, 'Appointment details fetched successfully', appointment));
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public static async createAppointment(req: Request, res: Response, next: NextFunction) {
     try {
       const apptNum = `SUS-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 100)}`;
