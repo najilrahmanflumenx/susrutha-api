@@ -47,7 +47,8 @@ export class AuthController {
             name: user.name,
             email: user.email,
             phone: user.phone,
-            role: user.roleId,
+            roleId: user.roleId,   // populated Role document: { _id, name, displayName, permissions }
+            roleName: typeof user.roleId === 'object' ? (user.roleId as any)?.name : '',
           },
         },
         'Admin authentication successful'
