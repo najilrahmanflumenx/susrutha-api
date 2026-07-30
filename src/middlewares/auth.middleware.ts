@@ -84,10 +84,20 @@ export const requirePermission = (requiredPermission: string) => {
       );
     }
 
+    const modulePrefix = requiredPermission.split(':')[0];
+
     const hasPermission =
       isSuperAdmin ||
       userPermissions.includes(requiredPermission) ||
-      (requiredPermission.endsWith(':read') && (userPermissions.includes('*:read') || userPermissions.includes('view_only')));
+      userPermissions.includes(`${modulePrefix}:write`) ||
+      userPermissions.includes(`${modulePrefix}:manage`) ||
+      userPermissions.includes(`${modulePrefix}:process`) ||
+      (requiredPermission.endsWith(':read') &&
+        (userPermissions.includes('*:read') ||
+          userPermissions.includes('view_only') ||
+          userPermissions.includes(`${modulePrefix}:write`) ||
+          userPermissions.includes(`${modulePrefix}:manage`) ||
+          userPermissions.includes(`${modulePrefix}:process`)));
 
     if (!hasPermission) {
       return next(
