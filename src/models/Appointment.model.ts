@@ -10,7 +10,7 @@ export interface IAppointment extends Document {
   branchId: Schema.Types.ObjectId;
   departmentId?: Schema.Types.ObjectId;
   doctorId?: Schema.Types.ObjectId;
-  consultationType: 'OPD_INPERSON' | 'IPD_ADMISSION' | 'TELE_CONSULTATION';
+  consultationType: string;
   preferredDate: Date;
   preferredTimeSlot: string;
   symptomsNote?: string;
@@ -32,7 +32,6 @@ const AppointmentSchema = new Schema<IAppointment>(
     doctorId: { type: Schema.Types.ObjectId, ref: 'Doctor' },
     consultationType: {
       type: String,
-      enum: ['OPD_INPERSON', 'IPD_ADMISSION', 'TELE_CONSULTATION'],
       default: 'OPD_INPERSON',
     },
     preferredDate: { type: Date, default: Date.now },
