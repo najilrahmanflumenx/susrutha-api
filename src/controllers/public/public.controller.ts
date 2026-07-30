@@ -345,17 +345,54 @@ export class PublicController {
   }
 
   // GET /api/v1/public/packages
+  // GET /api/v1/public/packages
   static async getPackages(req: Request, res: Response) {
     try {
-      const { limit: reqLimit, page: reqPage } = req.query;
+      const { category, days, durationDays, search, q, limit: reqLimit, page: reqPage } = req.query;
+      let query: any = { status: 'ACTIVE', isDeleted: false };
+
+      const targetDays = days || durationDays || category;
+      if (targetDays && targetDays !== 'ALL') {
+        const numDays = parseInt((targetDays as string).replace(/\D/g, ''), 10);
+        if (!isNaN(numDays)) {
+          query.durationDays = numDays;
+        }
+      }
+
+      const searchTerm = (search || q) as string;
+      if (searchTerm && searchTerm.trim()) {
+        const regex = new RegExp(searchTerm.trim(), 'i');
+        query.$or = [{ title: regex }, { subtitle: regex }, { overview: regex }];
+      }
+
       const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const packages = await CarePackage.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(packages, 'Public packages fetched successfully'));
+      const [packages, total] = await Promise.all([
+        CarePackage.find(query).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit),
+        CarePackage.countDocuments(query),
+      ]);
+
+      const data = packages;
+      const totalCount = total || data.length;
+      return res.status(200).json(
+        ApiResponse.success(data, 'Public packages fetched successfully', {
+          total: totalCount,
+          page,
+          limit,
+          totalPages: Math.ceil(totalCount / limit) || 1,
+        })
+      );
     } catch (err) {
-      return res.status(200).json(ApiResponse.success([], 'Packages fetched successfully'));
+      return res.status(200).json(
+        ApiResponse.success([], 'Packages fetched successfully', {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+        })
+      );
     }
   }
 
@@ -411,12 +448,27 @@ export class PublicController {
   static async getTestimonials(req: Request, res: Response) {
     try {
       const { limit: reqLimit, page: reqPage } = req.query;
-      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const limit = reqLimit ? parseInt(reqLimit as string, 10) : 9;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const testimonials = await Testimonial.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(testimonials, 'Public testimonials fetched successfully'));
+      const [testimonials, total] = await Promise.all([
+        Testimonial.find({ status: 'ACTIVE', isDeleted: false })
+          .select('-__v -createdAt -updatedAt -isDeleted')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit),
+        Testimonial.countDocuments({ status: 'ACTIVE', isDeleted: false }),
+      ]);
+
+      return res.status(200).json(
+        ApiResponse.success(testimonials, 'Public testimonials fetched successfully', {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit) || 1,
+        })
+      );
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Testimonials fetched successfully'));
     }
@@ -425,13 +477,39 @@ export class PublicController {
   // GET /api/v1/public/faqs
   static async getFaqs(req: Request, res: Response) {
     try {
-      const { limit: reqLimit, page: reqPage } = req.query;
+      const { limit: reqLimit, page: reqPage, category, q } = req.query;
       const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const faqs = await FAQ.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
-      return res.status(200).json(ApiResponse.success(faqs, 'Public FAQs fetched successfully'));
+      const query: any = { status: 'ACTIVE', isDeleted: false };
+      if (category && category !== 'ALL') {
+        query.category = { $regex: new RegExp(`^${category}$`, 'i') };
+      }
+      if (q) {
+        query.$or = [
+          { question: { $regex: q as string, $options: 'i' } },
+          { answer: { $regex: q as string, $options: 'i' } },
+        ];
+      }
+
+      const [faqs, total] = await Promise.all([
+        FAQ.find(query)
+          .select('-__v -createdAt -updatedAt -isDeleted')
+          .sort({ sortOrder: 1, createdAt: -1 })
+          .skip(skip)
+          .limit(limit),
+        FAQ.countDocuments(query),
+      ]);
+
+      return res.status(200).json(
+        ApiResponse.success(faqs, 'Public FAQs fetched successfully', {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit) || 1,
+        })
+      );
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'FAQs fetched successfully'));
     }
@@ -483,18 +561,28 @@ export class PublicController {
 
   // POST /api/v1/public/contact
   static async submitLead(req: Request, res: Response) {
-    const { name, phone, email, subject, message, branchId } = req.body;
+    const { name, phone, email, subject, message, branchId, leadType, packageId, treatmentId, doctorId, rating, preferredDate, preferredTimeSlot, symptomsNote } = req.body;
     if (!name || !phone) {
       throw ApiError.badRequest('Name and Phone are required');
     }
+
+    const computedLeadType = leadType || (packageId ? 'PACKAGE_BOOKING' : treatmentId ? 'SINGLE_TREATMENT' : rating ? 'FEEDBACK_RATING' : 'GENERAL_INQUIRY');
 
     const lead = await Lead.create({
       name,
       phone,
       email,
-      subject: subject || 'General Enquiry',
-      message: message || '',
-      branchId,
+      subject: subject || (computedLeadType === 'PACKAGE_BOOKING' ? 'Package Booking Request' : computedLeadType === 'SINGLE_TREATMENT' ? 'Treatment Reservation Request' : 'General Inquiry'),
+      message: message || symptomsNote || '',
+      leadType: computedLeadType,
+      packageId: packageId || undefined,
+      treatmentId: treatmentId || undefined,
+      doctorId: doctorId || undefined,
+      rating: rating || undefined,
+      preferredDate: preferredDate || undefined,
+      preferredTimeSlot: preferredTimeSlot || undefined,
+      symptomsNote: symptomsNote || undefined,
+      branchId: branchId || undefined,
       status: 'NEW',
     });
 
@@ -511,13 +599,25 @@ export class PublicController {
     const testimonial = await Testimonial.create({
       patientName: name,
       patientLocation: 'Website Feedback',
-      rating: rating ? parseInt(rating, 10) : 5,
       reviewText: message,
+      rating: rating ? parseInt(rating as string, 10) || 5 : 5,
       status: 'ACTIVE',
       isFeatured: false,
     });
 
-    return res.status(201).json(ApiResponse.success(testimonial, 'Thank you for your valuable feedback!'));
+    // Also record as a Feedback Rating Lead in admin CMS
+    await Lead.create({
+      name,
+      phone: phone || 'N/A',
+      subject: `Feedback Rating (${rating || 5} Stars)`,
+      message,
+      leadType: 'FEEDBACK_RATING',
+      rating: rating ? parseInt(rating as string, 10) || 5 : 5,
+      source: 'FEEDBACK_FORM',
+      status: 'NEW',
+    });
+
+    return res.status(201).json(ApiResponse.success(testimonial, 'Thank you for your valuable rating and feedback!'));
   }
 
   // GET /api/v1/public/conditions

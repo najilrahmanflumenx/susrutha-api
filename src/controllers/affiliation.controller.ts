@@ -17,7 +17,18 @@ export const getAffiliations = async (req: Request, res: Response): Promise<void
 
 export const createAffiliation = async (req: Request, res: Response): Promise<void> => {
   try {
-    const affiliation = await Affiliation.create(req.body);
+    const title = req.body.title || req.body.name || 'Accreditation Item';
+    const name = req.body.name || title;
+    const status = req.body.status === 'ACTIVE' ? 'published' : req.body.status || 'published';
+
+    const payload = {
+      ...req.body,
+      title,
+      name,
+      status,
+    };
+
+    const affiliation = await Affiliation.create(payload);
     res.status(201).json({ success: true, data: affiliation });
   } catch (error: any) {
     res.status(400).json({ success: false, message: error.message });
@@ -26,6 +37,16 @@ export const createAffiliation = async (req: Request, res: Response): Promise<vo
 
 export const updateAffiliation = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (req.body.name && !req.body.title) {
+      req.body.title = req.body.name;
+    }
+    if (req.body.title && !req.body.name) {
+      req.body.name = req.body.title;
+    }
+    if (req.body.status === 'ACTIVE') {
+      req.body.status = 'published';
+    }
+
     const affiliation = await Affiliation.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!affiliation) {
       res.status(404).json({ success: false, message: 'Affiliation not found' });

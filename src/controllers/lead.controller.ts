@@ -4,25 +4,67 @@ import { ApiResponse } from '../utils/ApiResponse';
 
 export class LeadController {
   static async getAllLeads(req: Request, res: Response) {
-    const { branchId, status, q, page: reqPage, limit: reqLimit } = req.query;
+    const { branchId, status, leadType, q, page: reqPage, limit: reqLimit } = req.query;
     const query: any = { isDeleted: false };
     if (branchId && branchId !== 'ALL') query.branchId = branchId;
-    if (status) query.status = status;
+    if (status && status !== 'ALL') query.status = status;
+
+    if (leadType && leadType !== 'ALL') {
+      if (leadType === 'PACKAGE_BOOKING') {
+        query.$or = [
+          { leadType: 'PACKAGE_BOOKING' },
+          { packageId: { $ne: null } },
+          { subject: { $regex: 'package', $options: 'i' } },
+          { message: { $regex: 'package', $options: 'i' } },
+        ];
+      } else if (leadType === 'SINGLE_TREATMENT') {
+        query.$or = [
+          { leadType: 'SINGLE_TREATMENT' },
+          { treatmentId: { $ne: null } },
+          { subject: { $regex: 'treatment|therapy', $options: 'i' } },
+          { message: { $regex: 'treatment|therapy', $options: 'i' } },
+        ];
+      } else if (leadType === 'FEEDBACK_RATING') {
+        query.$or = [
+          { leadType: 'FEEDBACK_RATING' },
+          { rating: { $ne: null } },
+          { subject: { $regex: 'rating|feedback', $options: 'i' } },
+        ];
+      } else if (leadType === 'GENERAL_INQUIRY') {
+        query.packageId = null;
+        query.treatmentId = null;
+        query.subject = { $not: { $regex: 'package|treatment|therapy', $options: 'i' } };
+      }
+    }
+
     if (q) {
-      query.$or = [
-        { name: { $regex: q as string, $options: 'i' } },
-        { phone: { $regex: q as string, $options: 'i' } },
-        { email: { $regex: q as string, $options: 'i' } },
-        { subject: { $regex: q as string, $options: 'i' } },
+      const searchRegex = { $regex: q as string, $options: 'i' };
+      query.$and = [
+        {
+          $or: [
+            { name: searchRegex },
+            { phone: searchRegex },
+            { email: searchRegex },
+            { subject: searchRegex },
+            { message: searchRegex },
+          ],
+        },
       ];
     }
 
-    const limit = reqLimit ? parseInt(reqLimit as string, 10) : 10;
+    const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
     const page = reqPage ? parseInt(reqPage as string, 10) : 1;
     const skip = (page - 1) * limit;
 
     const [leads, total] = await Promise.all([
-      Lead.find(query).populate('branchId', 'name code').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Lead.find(query)
+        .populate('branchId', 'name code')
+        .populate('packageId', 'title durationDays price coverImage')
+        .populate('treatmentId', 'title name price duration')
+        .populate('doctorId', 'name designation specialization photo')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
       Lead.countDocuments(query),
     ]);
 
@@ -31,7 +73,7 @@ export class LeadController {
       success: true,
       message: 'Patient leads fetched successfully',
       data: leads,
-      meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
     });
   }
 

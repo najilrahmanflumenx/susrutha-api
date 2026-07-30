@@ -13,14 +13,26 @@ export class SettingController {
   }
 
   static async updateSetting(req: Request, res: Response) {
-    // Support bulk payload: { HERO: {...}, ABOUT: {...} } or single: { key: 'HERO', value: {...} }
-    if (req.body.key && req.body.value) {
+    const keyParam = req.params.key;
+    if (keyParam) {
+      const uppercaseKey = keyParam.toUpperCase();
+      const value = req.body.value !== undefined ? req.body.value : req.body;
+      const setting = await Setting.findOneAndUpdate(
+        { key: uppercaseKey },
+        { value },
+        { new: true, upsert: true }
+      );
+      return res.status(200).json(ApiResponse.success(setting, 'Setting updated successfully'));
+    }
+
+    // Support single item in body: { key: 'HERO', value: {...} }
+    if (req.body.key && req.body.value !== undefined) {
       const key = req.body.key.toUpperCase();
       const setting = await Setting.findOneAndUpdate({ key }, { value: req.body.value }, { new: true, upsert: true });
       return res.status(200).json(ApiResponse.success(setting, 'Setting updated successfully'));
     }
 
-    // Bulk update object keys
+    // Bulk update object keys: { HERO: {...}, GENERAL: {...} }
     const updates = [];
     for (const [key, value] of Object.entries(req.body)) {
       if (typeof value === 'object' && value !== null) {
@@ -44,4 +56,3 @@ export class SettingController {
     return res.status(200).json(ApiResponse.success(settingsMap, 'Settings updated successfully'));
   }
 }
-

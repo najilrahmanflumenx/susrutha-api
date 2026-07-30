@@ -34,11 +34,17 @@ export class BlogController {
   }
 
   static async createBlog(req: Request, res: Response) {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const blog = await Blog.create(req.body);
     return res.status(201).json(ApiResponse.success(blog, 'Blog created successfully'));
   }
 
   static async updateBlog(req: Request, res: Response) {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const updated = await Blog.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, req.body, { new: true, runValidators: true });
     return res.status(200).json(ApiResponse.success(updated, 'Blog updated successfully'));
   }

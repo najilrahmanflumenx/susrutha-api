@@ -78,14 +78,31 @@ export class AppointmentController {
 
   public static async updateAppointmentStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const { status, adminNotes } = req.body;
       const updated = await Appointment.findOneAndUpdate(
         { _id: req.params.id, isDeleted: false },
-        { status, adminNotes },
-        { new: true }
+        req.body,
+        { new: true, runValidators: true }
       );
       if (!updated) throw new ApiError(404, 'Appointment not found');
       res.status(200).json(new ApiResponse(200, 'Appointment status updated', updated));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  public static async updateAppointment(req: Request, res: Response, next: NextFunction) {
+    return AppointmentController.updateAppointmentStatus(req, res, next);
+  }
+
+  public static async deleteAppointment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const deleted = await Appointment.findOneAndUpdate(
+        { _id: req.params.id },
+        { isDeleted: true },
+        { new: true }
+      );
+      if (!deleted) throw new ApiError(404, 'Appointment not found');
+      res.status(200).json(new ApiResponse(200, 'Appointment deleted successfully', null));
     } catch (error) {
       next(error);
     }

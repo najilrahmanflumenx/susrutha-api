@@ -57,6 +57,9 @@ export const getTreatmentBySlug = async (req: Request, res: Response): Promise<v
 
 export const createTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const treatment = await Treatment.create(req.body);
     res.status(201).json({ success: true, data: treatment });
   } catch (error: any) {
@@ -66,6 +69,9 @@ export const createTreatment = async (req: Request, res: Response): Promise<void
 
 export const updateTreatment = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const treatment = await Treatment.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!treatment) {
       res.status(404).json({ success: false, message: 'Treatment not found' });

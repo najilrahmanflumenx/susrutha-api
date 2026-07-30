@@ -21,6 +21,16 @@ export const getVideos = async (req: Request, res: Response): Promise<void> => {
 
 export const createVideo = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      const baseSlug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      req.body.slug = `${baseSlug}-${Date.now()}`;
+    }
+    if (!req.body.status || req.body.status === 'ACTIVE') {
+      req.body.status = 'published';
+    }
+    if (!req.body.youtubeUrl && req.body.videoUrl) {
+      req.body.youtubeUrl = req.body.videoUrl;
+    }
     const video = await Video.create(req.body);
     res.status(201).json({ success: true, data: video });
   } catch (error: any) {
@@ -30,6 +40,15 @@ export const createVideo = async (req: Request, res: Response): Promise<void> =>
 
 export const updateVideo = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (req.body.title && !req.body.slug) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+    if (req.body.status === 'ACTIVE') {
+      req.body.status = 'published';
+    }
+    if (!req.body.youtubeUrl && req.body.videoUrl) {
+      req.body.youtubeUrl = req.body.videoUrl;
+    }
     const video = await Video.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!video) {
       res.status(404).json({ success: false, message: 'Video not found' });

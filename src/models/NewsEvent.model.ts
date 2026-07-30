@@ -3,16 +3,18 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface INewsEvent extends Document {
   title: string;
   slug: string;
-  type: 'press_release' | 'newspaper_clipping' | 'tv_feature' | 'event' | 'award';
+  type: string;
   publisherName: string;
   publishedDate: Date;
   summary: string;
   content: string;
   coverImage?: string;
   externalLink?: string;
+  articleUrl?: string;
   attachmentUrl?: string;
+  publicationType?: string;
   isFeatured: boolean;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'archived' | 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   seo?: {
     metaTitle?: string;
@@ -28,18 +30,19 @@ const NewsEventSchema = new Schema<INewsEvent>(
     slug: { type: String, required: true, unique: true, trim: true },
     type: {
       type: String,
-      enum: ['press_release', 'newspaper_clipping', 'tv_feature', 'event', 'award'],
       default: 'press_release',
     },
+    publicationType: { type: String, default: 'newspaper' },
     publisherName: { type: String, default: 'Susrutha Media' },
     publishedDate: { type: Date, default: Date.now },
-    summary: { type: String, required: true },
+    summary: { type: String, default: '' },
     content: { type: String, default: '' },
     coverImage: { type: String, default: '' },
     externalLink: { type: String, default: '' },
+    articleUrl: { type: String, default: '' },
     attachmentUrl: { type: String, default: '' },
     isFeatured: { type: Boolean, default: false },
-    status: { type: String, enum: ['draft', 'published', 'archived'], default: 'published' },
+    status: { type: String, enum: ['draft', 'published', 'archived', 'ACTIVE', 'INACTIVE'], default: 'published' },
     isDeleted: { type: Boolean, default: false },
     seo: {
       metaTitle: { type: String, default: '' },

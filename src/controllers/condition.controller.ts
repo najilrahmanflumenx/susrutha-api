@@ -56,6 +56,9 @@ export const getConditionBySlug = async (req: Request, res: Response): Promise<v
 
 export const createCondition = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const condition = await Condition.create(req.body);
     res.status(201).json({ success: true, data: condition });
   } catch (error: any) {
@@ -65,6 +68,9 @@ export const createCondition = async (req: Request, res: Response): Promise<void
 
 export const updateCondition = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const condition = await Condition.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!condition) {
       res.status(404).json({ success: false, message: 'Condition not found' });

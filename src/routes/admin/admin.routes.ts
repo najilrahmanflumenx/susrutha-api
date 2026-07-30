@@ -62,6 +62,11 @@ router.get('/dashboard', asyncHandler(async (req: Request, res: Response) => {
     doctorFilter.assignedBranchIds = targetBranch._id;
     appointmentFilter.branchId = targetBranch._id;
     leadFilter.branchId = targetBranch._id;
+  } else if (branchCode && branchCode !== 'ALL') {
+    const dummyId = new mongoose.Types.ObjectId();
+    doctorFilter.assignedBranchIds = dummyId;
+    appointmentFilter.branchId = dummyId;
+    leadFilter.branchId = dummyId;
   }
 
   const [activeDoctors, todayAppointments, pendingLeads, publishedBlogs, galleryAlbums, mediaVideos, allBranches] = await Promise.all([
@@ -112,6 +117,8 @@ router.delete('/departments/:id', asyncHandler(DepartmentController.deleteDepart
 
 router.get('/appointments', asyncHandler(AppointmentController.getAllAppointments));
 router.post('/appointments', asyncHandler(AppointmentController.createAppointment));
+router.put('/appointments/:id', asyncHandler(AppointmentController.updateAppointment));
+router.delete('/appointments/:id', asyncHandler(AppointmentController.deleteAppointment));
 
 router.get('/packages', asyncHandler(CarePackageController.getAllPackages));
 router.post('/packages', asyncHandler(CarePackageController.createPackage));
@@ -145,6 +152,9 @@ router.delete('/roles/:id', asyncHandler(RoleController.deleteRole));
 
 router.get('/settings', asyncHandler(SettingController.getAllSettings));
 router.post('/settings', asyncHandler(SettingController.updateSetting));
+router.put('/settings', asyncHandler(SettingController.updateSetting));
+router.post('/settings/:key', asyncHandler(SettingController.updateSetting));
+router.put('/settings/:key', asyncHandler(SettingController.updateSetting));
 
 // New Feature Parity Routes
 router.get('/conditions', asyncHandler(getConditions));
@@ -167,6 +177,11 @@ router.post('/media-coverage', asyncHandler(createNewsEvent));
 router.put('/media-coverage/:id', asyncHandler(updateNewsEvent));
 router.delete('/media-coverage/:id', asyncHandler(deleteNewsEvent));
 
+router.get('/news-events', asyncHandler(getNewsEvents));
+router.post('/news-events', asyncHandler(createNewsEvent));
+router.put('/news-events/:id', asyncHandler(updateNewsEvent));
+router.delete('/news-events/:id', asyncHandler(deleteNewsEvent));
+
 router.get('/videos', asyncHandler(getVideos));
 router.post('/videos', asyncHandler(createVideo));
 router.put('/videos/:id', asyncHandler(updateVideo));
@@ -188,26 +203,33 @@ router.delete('/media-library/:id', asyncHandler(deleteMediaFile));
 
 // File Upload Endpoint (Images & Videos)
 import { upload } from '../../middlewares/upload.middleware';
+import { optimizeUploadedFile } from '../../utils/fileOptimizer';
 import MediaFile from '../../models/MediaFile.model';
 router.post('/upload', upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
+
+  // Auto-optimize uploaded images/videos (Sharp -> WebP for images, FFmpeg -> compressed MP4 for videos)
+  const optimized = await optimizeUploadedFile(req.file);
+
   const host = process.env.PUBLIC_API_URL || `${req.protocol}://${req.get('host')}`;
-  const fileUrl = `${host}/uploads/${req.file.filename}`;
+  const fileUrl = `${host}/uploads/${optimized.filename}`;
+
   const mediaRecord = await MediaFile.create({
-    filename: req.file.filename,
-    originalName: req.file.originalname,
-    mimeType: req.file.mimetype,
-    size: req.file.size || 0,
+    filename: optimized.filename,
+    originalName: optimized.originalname,
+    mimeType: optimized.mimetype,
+    size: optimized.size,
     url: fileUrl,
     folder: 'general',
   });
+
   return res.status(201).json({
     success: true,
     url: fileUrl,
     data: mediaRecord,
-    message: 'File uploaded successfully',
+    message: 'File uploaded and optimized successfully',
   });
 }));
 
@@ -222,5 +244,17 @@ router.get('/testimonials', asyncHandler(getTestimonials));
 router.post('/testimonials', asyncHandler(createTestimonial));
 router.put('/testimonials/:id', asyncHandler(updateTestimonial));
 router.delete('/testimonials/:id', asyncHandler(deleteTestimonial));
+
+// Staff User Accounts (CRUD)
+router.get('/users', asyncHandler(UserController.getAllUsers));
+router.post('/users', asyncHandler(UserController.createUser));
+router.put('/users/:id', asyncHandler(UserController.updateUser));
+router.delete('/users/:id', asyncHandler(UserController.deleteUser));
+
+// Roles & Permissions (CRUD)
+router.get('/roles', asyncHandler(RoleController.getAllRoles));
+router.post('/roles', asyncHandler(RoleController.createRole));
+router.put('/roles/:id', asyncHandler(RoleController.updateRole));
+router.delete('/roles/:id', asyncHandler(RoleController.deleteRole));
 
 export default router;

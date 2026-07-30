@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IEcosystem extends Document {
   title: string;
   slug: string;
-  pillarType: 'herbal_garden' | 'pharmacy_unit' | 'research_center' | 'academy';
+  pillarType: string;
   tagline: string;
   description: string;
   coverImage?: string;
@@ -26,8 +26,8 @@ const EcosystemSchema = new Schema<IEcosystem>(
     slug: { type: String, required: true, unique: true, trim: true },
     pillarType: {
       type: String,
-      enum: ['herbal_garden', 'pharmacy_unit', 'research_center', 'academy'],
-      required: true,
+      default: 'General Pillar',
+      trim: true,
     },
     tagline: { type: String, default: '' },
     description: { type: String, required: true },

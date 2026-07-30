@@ -6,13 +6,15 @@ import { Testimonial } from '../models/Testimonial.model';
 import { FAQ } from '../models/FAQ.model';
 import { Lead } from '../models/Lead.model';
 import { ApiResponse } from '../utils/ApiResponse';
+import { resolveBranchObjectId } from '../utils/branchResolver';
 
 export class ContentController {
   public static async getPackages(req: Request, res: Response, next: NextFunction) {
     try {
-      const { branchId } = req.query;
+      const { branchId, branchCode } = req.query;
       const query: any = { isDeleted: false, status: 'ACTIVE' };
-      if (branchId) query.assignedBranchIds = branchId;
+      const resolved = await resolveBranchObjectId(branchId || branchCode);
+      if (resolved) query.assignedBranchIds = resolved;
       const packages = await CarePackage.find(query).sort({ sortOrder: 1 });
       res.status(200).json(new ApiResponse(200, 'Care packages fetched', packages));
     } catch (error) { next(error); }

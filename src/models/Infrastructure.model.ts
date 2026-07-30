@@ -8,6 +8,7 @@ export interface IInfrastructure extends Document {
   specifications: string[];
   capacity?: number;
   coverImage?: string;
+  image?: string;
   galleryImages: string[];
   sortOrder: number;
   status: 'ACTIVE' | 'INACTIVE';
@@ -22,11 +23,12 @@ const InfrastructureSchema = new Schema<IInfrastructure>(
       enum: ['ROOMS', 'PANCHAKARMA_SUITES', 'OPERATING_THEATRE', 'PHYSIOTHERAPY', 'YOGA_HALL', 'AYUR_VILLAGE', 'OTHER'],
       required: true,
     },
-    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: 'Branch', required: false },
     description: { type: String, required: true },
     specifications: [{ type: String }],
     capacity: { type: Number },
     coverImage: { type: String },
+    image: { type: String },
     galleryImages: [{ type: String }],
     sortOrder: { type: Number, default: 0 },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },

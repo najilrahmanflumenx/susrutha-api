@@ -3,9 +3,10 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IVideo extends Document {
   title: string;
   slug: string;
-  category: 'patient_story' | 'doctor_talk' | 'facility_tour' | 'treatment_demo';
-  youtubeUrl: string;
-  videoHost: 'youtube' | 'vimeo' | 'cloudinary';
+  category: string;
+  youtubeUrl?: string;
+  videoUrl?: string;
+  videoHost?: string;
   thumbnailUrl?: string;
   duration?: string;
   description: string;
@@ -13,7 +14,7 @@ export interface IVideo extends Document {
   treatmentId?: mongoose.Types.ObjectId;
   isFeatured: boolean;
   sortOrder: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'published' | 'draft' | 'archived' | 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   createdBy?: mongoose.Types.ObjectId;
   updatedBy?: mongoose.Types.ObjectId;
@@ -25,11 +26,12 @@ const VideoSchema = new Schema<IVideo>(
     slug: { type: String, required: true, unique: true, trim: true },
     category: {
       type: String,
-      enum: ['patient_story', 'doctor_talk', 'facility_tour', 'treatment_demo'],
-      default: 'patient_story',
+      default: 'facility_tour',
+      trim: true,
     },
-    youtubeUrl: { type: String, required: true, trim: true },
-    videoHost: { type: String, enum: ['youtube', 'vimeo', 'cloudinary'], default: 'youtube' },
+    youtubeUrl: { type: String, default: '', trim: true },
+    videoUrl: { type: String, default: '', trim: true },
+    videoHost: { type: String, default: 'youtube' },
     thumbnailUrl: { type: String, default: '' },
     duration: { type: String, default: '' },
     description: { type: String, default: '' },
@@ -37,7 +39,11 @@ const VideoSchema = new Schema<IVideo>(
     treatmentId: { type: Schema.Types.ObjectId, ref: 'Treatment' },
     isFeatured: { type: Boolean, default: false },
     sortOrder: { type: Number, default: 0 },
-    status: { type: String, enum: ['draft', 'published', 'archived'], default: 'published' },
+    status: {
+      type: String,
+      enum: ['published', 'draft', 'archived', 'ACTIVE', 'INACTIVE'],
+      default: 'published',
+    },
     isDeleted: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },

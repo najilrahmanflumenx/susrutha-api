@@ -20,6 +20,11 @@ const storage = isVercel
   ? multer.memoryStorage()
   : multer.diskStorage({
       destination: (_req, _file, cb) => {
+        if (!isVercel && !fs.existsSync(uploadDir)) {
+          try {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          } catch (e) {}
+        }
         cb(null, uploadDir);
       },
       filename: (_req, file, cb) => {

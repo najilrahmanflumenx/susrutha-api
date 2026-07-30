@@ -25,7 +25,7 @@ const CarePackageSchema = new Schema<ICarePackage>(
     subtitle: { type: String },
     durationDays: { type: Number, required: true, default: 7 },
     assignedBranchIds: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
-    overview: { type: String, required: true },
+    overview: { type: String, default: '' },
     inclusions: [{ type: String }],
     exclusions: [{ type: String }],
     targetAilments: [{ type: String }],

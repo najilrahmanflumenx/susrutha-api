@@ -2,15 +2,20 @@ import { Request, Response, NextFunction } from 'express';
 import { Doctor } from '../models/Doctor.model';
 import { ApiResponse } from '../utils/ApiResponse';
 import { ApiError } from '../utils/ApiError';
+import { resolveBranchObjectId, resolveBranchObjectIds } from '../utils/branchResolver';
 
 export class DoctorController {
   public static async getAllDoctors(req: Request, res: Response, next: NextFunction) {
     try {
-      const { branchId, departmentId, isDirector, q, page: reqPage, limit: reqLimit } = req.query;
+      const { branchId, branchCode, departmentId, isDirector, q, page: reqPage, limit: reqLimit } = req.query;
       const query: any = { isDeleted: false };
 
-      if (branchId) {
-        query.assignedBranchIds = branchId;
+      const branchParam = branchId || branchCode || req.query.assignedBranchIds;
+      if (branchParam) {
+        const resolvedBranchId = await resolveBranchObjectId(branchParam);
+        if (resolvedBranchId) {
+          query.assignedBranchIds = resolvedBranchId;
+        }
       }
       if (departmentId) {
         query.departmentId = departmentId;
@@ -69,6 +74,15 @@ export class DoctorController {
 
   public static async createDoctor(req: Request, res: Response, next: NextFunction) {
     try {
+      if (!req.body.slug && req.body.name) {
+        req.body.slug = req.body.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+
+      if (req.body.assignedBranchIds || req.body.branchCode) {
+        const rawBranches = req.body.assignedBranchIds || req.body.branchCode;
+        req.body.assignedBranchIds = await resolveBranchObjectIds(rawBranches);
+      }
+
       const doctor = await Doctor.create(req.body);
       res.status(201).json(new ApiResponse(201, 'Doctor profile created', doctor));
     } catch (error) {
@@ -78,6 +92,15 @@ export class DoctorController {
 
   public static async updateDoctor(req: Request, res: Response, next: NextFunction) {
     try {
+      if (!req.body.slug && req.body.name) {
+        req.body.slug = req.body.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+
+      if (req.body.assignedBranchIds || req.body.branchCode) {
+        const rawBranches = req.body.assignedBranchIds || req.body.branchCode;
+        req.body.assignedBranchIds = await resolveBranchObjectIds(rawBranches);
+      }
+
       const updated = await Doctor.findOneAndUpdate(
         { _id: req.params.id, isDeleted: false },
         req.body,

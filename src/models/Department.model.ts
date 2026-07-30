@@ -10,6 +10,8 @@ export interface IDepartment extends Document {
   assignedBranchIds: Schema.Types.ObjectId[];
   icon?: string;
   coverImage?: string;
+  image?: string;
+  branchCode?: string;
   sortOrder: number;
   isFeatured: boolean;
   status: 'ACTIVE' | 'INACTIVE';
@@ -27,6 +29,8 @@ const DepartmentSchema = new Schema<IDepartment>(
     assignedBranchIds: [{ type: Schema.Types.ObjectId, ref: 'Branch' }],
     icon: { type: String },
     coverImage: { type: String },
+    image: { type: String },
+    branchCode: { type: String, uppercase: true, trim: true },
     sortOrder: { type: Number, default: 0 },
     isFeatured: { type: Boolean, default: false },
     status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },

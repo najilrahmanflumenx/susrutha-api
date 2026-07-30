@@ -17,6 +17,9 @@ export const getEcosystemPillars = async (req: Request, res: Response): Promise<
 
 export const createEcosystemPillar = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const pillar = await Ecosystem.create(req.body);
     res.status(201).json({ success: true, data: pillar });
   } catch (error: any) {
@@ -26,6 +29,9 @@ export const createEcosystemPillar = async (req: Request, res: Response): Promis
 
 export const updateEcosystemPillar = async (req: Request, res: Response): Promise<void> => {
   try {
+    if (!req.body.slug && req.body.title) {
+      req.body.slug = req.body.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
     const pillar = await Ecosystem.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!pillar) {
       res.status(404).json({ success: false, message: 'Ecosystem pillar not found' });
