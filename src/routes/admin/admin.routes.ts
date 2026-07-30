@@ -26,6 +26,7 @@ import { getFAQs, createFAQ, updateFAQ, deleteFAQ } from '../../controllers/faq.
 import { getTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../../controllers/testimonial.controller';
 
 import { asyncHandler } from '../../utils/asyncHandler';
+import { optionalAuthenticateJWT, requirePermission } from '../../middlewares/auth.middleware';
 import { Doctor } from '../../models/Doctor.model';
 import { Appointment } from '../../models/Appointment.model';
 import { Lead } from '../../models/Lead.model';
@@ -35,6 +36,9 @@ import GalleryAlbum from '../../models/GalleryAlbum.model';
 import Video from '../../models/Video.model';
 
 const router = Router();
+
+// Automatically authenticate token on any admin route if token present
+router.use(optionalAuthenticateJWT);
 
 // Base Route: /api/v1/admin
 
@@ -248,14 +252,14 @@ router.delete('/testimonials/:id', asyncHandler(deleteTestimonial));
 
 // Staff User Accounts (CRUD)
 router.get('/users', asyncHandler(UserController.getAllUsers));
-router.post('/users', asyncHandler(UserController.createUser));
-router.put('/users/:id', asyncHandler(UserController.updateUser));
-router.delete('/users/:id', asyncHandler(UserController.deleteUser));
+router.post('/users', requirePermission('users:write'), asyncHandler(UserController.createUser));
+router.put('/users/:id', requirePermission('users:write'), asyncHandler(UserController.updateUser));
+router.delete('/users/:id', requirePermission('users:write'), asyncHandler(UserController.deleteUser));
 
 // Roles & Permissions (CRUD)
 router.get('/roles', asyncHandler(RoleController.getAllRoles));
-router.post('/roles', asyncHandler(RoleController.createRole));
-router.put('/roles/:id', asyncHandler(RoleController.updateRole));
-router.delete('/roles/:id', asyncHandler(RoleController.deleteRole));
+router.post('/roles', requirePermission('roles:write'), asyncHandler(RoleController.createRole));
+router.put('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.updateRole));
+router.delete('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.deleteRole));
 
 export default router;
