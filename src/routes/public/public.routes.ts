@@ -23,6 +23,8 @@ router.get('/doctors/:slug', asyncHandler(PublicController.getDoctorBySlug));
 router.get('/departments', asyncHandler(PublicController.getDepartments));
 router.get('/packages', asyncHandler(PublicController.getPackages));
 router.get('/packages/:slug', asyncHandler(PublicController.getPackageBySlug));
+router.get('/care-packages', asyncHandler(PublicController.getPackages));
+router.get('/care-packages/:slug', asyncHandler(PublicController.getPackageBySlug));
 router.get('/blogs', asyncHandler(PublicController.getBlogs));
 router.get('/blogs/:slug', asyncHandler(PublicController.getBlogBySlug));
 router.get('/facilities', asyncHandler(PublicController.getFacilities));
