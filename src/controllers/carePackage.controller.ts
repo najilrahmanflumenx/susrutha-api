@@ -52,6 +52,9 @@ export class CarePackageController {
     if (!req.body.overview) {
       req.body.overview = req.body.description || req.body.subtitle || req.body.title || 'Comprehensive Ayurvedic care package protocol.';
     }
+    if (!req.body.image && (req.body.bannerImage || req.body.coverImage)) {
+      req.body.image = req.body.bannerImage || req.body.coverImage;
+    }
     const pkg = await CarePackage.create(req.body);
     return res.status(201).json(ApiResponse.success(pkg, 'Care package created successfully'));
   }
@@ -62,6 +65,9 @@ export class CarePackageController {
     }
     if (!req.body.overview) {
       req.body.overview = req.body.description || req.body.subtitle || req.body.title || 'Comprehensive Ayurvedic care package protocol.';
+    }
+    if (!req.body.image && (req.body.bannerImage || req.body.coverImage)) {
+      req.body.image = req.body.bannerImage || req.body.coverImage;
     }
     const updated = await CarePackage.findOneAndUpdate({ _id: req.params.id, isDeleted: false }, req.body, { new: true, runValidators: true });
     return res.status(200).json(ApiResponse.success(updated, 'Care package updated successfully'));

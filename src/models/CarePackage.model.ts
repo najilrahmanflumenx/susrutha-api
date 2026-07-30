@@ -11,6 +11,7 @@ export interface ICarePackage extends Document {
   exclusions: string[];
   targetAilments: string[];
   image?: string;
+  galleryImages?: string[];
   price?: number;
   isFeatured: boolean;
   sortOrder: number;
@@ -30,6 +31,7 @@ const CarePackageSchema = new Schema<ICarePackage>(
     exclusions: [{ type: String }],
     targetAilments: [{ type: String }],
     image: { type: String },
+    galleryImages: [{ type: String }],
     price: { type: Number },
     isFeatured: { type: Boolean, default: false },
     sortOrder: { type: Number, default: 0 },
