@@ -332,12 +332,20 @@ export class PublicController {
   // GET /api/v1/public/departments
   static async getDepartments(req: Request, res: Response) {
     try {
-      const { limit: reqLimit, page: reqPage } = req.query;
+      const { search, q, limit: reqLimit, page: reqPage } = req.query;
+      const searchTerm = ((search || q || '') as string).trim();
+      let query: any = { status: 'ACTIVE', isDeleted: false };
+
+      if (searchTerm) {
+        const regex = new RegExp(searchTerm, 'i');
+        query.$or = [{ title: regex }, { name: regex }, { tagline: regex }, { overview: regex }, { description: regex }];
+      }
+
       const limit = reqLimit ? parseInt(reqLimit as string, 10) : 50;
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
-      const departments = await Department.find({ status: 'ACTIVE', isDeleted: false }).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
+      const departments = await Department.find(query).select('-__v -createdAt -updatedAt -isDeleted').skip(skip).limit(limit);
       return res.status(200).json(ApiResponse.success(departments, 'Public departments fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Departments fetched successfully'));
@@ -777,6 +785,98 @@ export class PublicController {
       return res.status(200).json(ApiResponse.success(affiliations, 'Public affiliations fetched successfully'));
     } catch (err) {
       return res.status(200).json(ApiResponse.success([], 'Affiliations fetched successfully'));
+    }
+  }
+
+  // GET /api/v1/public/search?q=search_term
+  static async search(req: Request, res: Response) {
+    try {
+      const q = ((req.query.q || req.query.search || '') as string).trim();
+      if (!q) {
+        return res.status(200).json(ApiResponse.success([], 'No search term provided'));
+      }
+
+      const regex = new RegExp(q, 'i');
+      const limit = 5;
+
+      const [treatments, doctors, packages, conditions, departments] = await Promise.all([
+        Treatment.find({ isDeleted: false, $or: [{ name: regex }, { title: regex }, { category: regex }, { shortDescription: regex }] })
+          .select('name title slug category shortDescription coverImage image')
+          .limit(limit),
+        Doctor.find({ status: 'ACTIVE', isDeleted: false, $or: [{ name: regex }, { designation: regex }, { specialties: regex }] })
+          .select('name slug designation specialties photo photoUrl')
+          .limit(limit),
+        CarePackage.find({ status: 'ACTIVE', isDeleted: false, $or: [{ title: regex }, { subtitle: regex }, { overview: regex }] })
+          .select('title slug subtitle bannerImage price durationDays')
+          .limit(limit),
+        Condition.find({ isDeleted: false, $or: [{ title: regex }, { category: regex }, { shortDescription: regex }] })
+          .select('title slug category shortDescription coverImage')
+          .limit(limit),
+        Department.find({ status: 'ACTIVE', isDeleted: false, $or: [{ title: regex }, { name: regex }, { tagline: regex }, { overview: regex }] })
+          .select('title name slug tagline icon coverImage image')
+          .limit(limit),
+      ]);
+
+      const results: any[] = [];
+
+      treatments.forEach((item: any) => {
+        results.push({
+          id: item._id,
+          title: item.title || item.name,
+          type: 'TREATMENT',
+          subtitle: item.shortDescription || item.category,
+          url: `/treatments/${item.slug || item._id}`,
+          image: item.image || item.coverImage,
+        });
+      });
+
+      doctors.forEach((item: any) => {
+        results.push({
+          id: item._id,
+          title: item.name,
+          type: 'DOCTOR',
+          subtitle: item.designation || (Array.isArray(item.specialties) ? item.specialties.join(', ') : item.specialties),
+          url: `/doctors/${item.slug || item._id}`,
+          image: item.photoUrl || item.photo,
+        });
+      });
+
+      packages.forEach((item: any) => {
+        results.push({
+          id: item._id,
+          title: item.title,
+          type: 'RETREAT',
+          subtitle: item.subtitle || (item.durationDays ? `${item.durationDays} Days Package` : ''),
+          url: `/packages/${item.slug || item._id}`,
+          image: item.bannerImage,
+        });
+      });
+
+      conditions.forEach((item: any) => {
+        results.push({
+          id: item._id,
+          title: item.title,
+          type: 'CONDITION',
+          subtitle: item.shortDescription || item.category,
+          url: `/conditions/${item.slug || item._id}`,
+          image: item.coverImage,
+        });
+      });
+
+      departments.forEach((item: any) => {
+        results.push({
+          id: item._id,
+          title: item.title || item.name,
+          type: 'DEPARTMENT',
+          subtitle: item.tagline || item.overview,
+          url: `/departments/${item.slug || item._id}`,
+          image: item.icon || item.coverImage || item.image,
+        });
+      });
+
+      return res.status(200).json(ApiResponse.success(results, 'Global search completed'));
+    } catch (err: any) {
+      return res.status(200).json(ApiResponse.success([], 'Search failed'));
     }
   }
 }

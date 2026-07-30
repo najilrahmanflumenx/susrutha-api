@@ -15,6 +15,7 @@ const router = Router();
 
 // Base Route: /api/v1/public
 
+router.get('/search', asyncHandler(PublicController.search));
 router.get('/home', asyncHandler(PublicController.getHome));
 router.get('/settings', asyncHandler(PublicController.getSettings));
 router.get('/branches', asyncHandler(PublicController.getBranches));
