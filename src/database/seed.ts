@@ -28,104 +28,13 @@ dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/susrutha_db';
 
-// Vast collections of distinct high-resolution Unsplash URLs for visual diversity
-const IMAGES = {
-  doctors: [
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1594824813570-78a295000527?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1623854767648-e7bb8009f0db?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1584467735871-8e85353a8413?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1573497019236-17f8177b81e8?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1548142813-c348350df52b?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1552058544-f2b08422138a?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1534751516642-a171e261f52c?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1544717305-2782549b5136?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1521119989659-a83eee488004?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&auto=format&fit=crop&q=80',
-  ],
-  hospital: [
-    'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1512678080530-7760d81faba6?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1519494080410-f9ab7d1970b2?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1504813184591-01572f98c85f?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800&auto=format&fit=crop&q=80',
-  ],
-  therapy: [
-    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1512290900673-70024fe74923?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1591343393582-fc4407675147?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=800&auto=format&fit=crop&q=80',
-  ],
-  nature: [
-    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&auto=format&fit=crop&q=80',
-  ],
-  videos: [
-    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    'https://www.youtube.com/watch?v=2Vv-BfVoq4g',
-    'https://www.youtube.com/watch?v=3JZ_D3ELwOQ',
-    'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
-    'https://www.youtube.com/watch?v=fJ9rUzIMcZQ',
-  ]
-};
-
-const getImg = (arr: string[], index: number) => arr[index % arr.length];
-
-async function seedDatabase() {
+async function seedProductionDatabase() {
   try {
-    console.log('Connecting to MongoDB database for High-Capacity Load Seed...');
+    console.log('Connecting to MongoDB for Authentic Production Seeding...');
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB successfully.');
 
-    console.log('Purging all existing collections for clean state...');
+    console.log('Purging all existing database collections...');
     await Promise.all([
       User.deleteMany({}),
       Role.deleteMany({}),
@@ -152,681 +61,1023 @@ async function seedDatabase() {
     ]);
 
     // ==========================================
-    // 1. ROLES & USERS
+    // 1. ROLES & ADMIN USER
     // ==========================================
-    console.log('1. Seeding System Roles & Users...');
+    console.log('1. Seeding System Roles & Super Admin...');
     const superAdminRole = await Role.create({
       name: 'SUPER_ADMIN',
       displayName: 'Super Administrator',
-      description: 'Unrestricted full access across all hospital branches, CMS content, and system settings.',
+      description: 'Unrestricted full access across hospital branches, CMS, and system configuration.',
       permissions: ['*'],
       isSystem: true,
       status: 'ACTIVE',
     });
 
-    const branchAdminRole = await Role.create({
-      name: 'BRANCH_ADMIN',
-      displayName: 'Branch Manager',
-      description: 'Full administrative access restricted to assigned hospital branches.',
-      permissions: ['branch:read', 'branch:write', 'doctor:read', 'appointment:manage'],
-      isSystem: true,
-      status: 'ACTIVE',
-    });
-
-    const doctorRole = await Role.create({
-      name: 'DOCTOR',
-      displayName: 'Consultant Physician',
-      description: 'Access to OPD schedules, patient appointments, and medical notes.',
-      permissions: ['appointment:read', 'appointment:update', 'blog:create'],
-      isSystem: true,
-      status: 'ACTIVE',
-    });
-
-    const contentManagerRole = await Role.create({
-      name: 'CONTENT_MANAGER',
-      displayName: 'CMS Content Editor',
-      description: 'Manage website blogs, press releases, gallery, and care packages.',
-      permissions: ['blog:manage', 'media:manage', 'gallery:manage'],
-      isSystem: true,
-      status: 'ACTIVE',
-    });
+    await Role.create([
+      {
+        name: 'BRANCH_ADMIN',
+        displayName: 'Branch Manager',
+        description: 'Administrative access restricted to assigned hospital branches.',
+        permissions: ['branch:read', 'branch:write', 'doctor:read', 'appointment:manage'],
+        isSystem: true,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'DOCTOR',
+        displayName: 'Consultant Physician',
+        description: 'Access to OPD schedules, patient appointments, and medical notes.',
+        permissions: ['appointment:read', 'appointment:update', 'blog:create'],
+        isSystem: true,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'CONTENT_MANAGER',
+        displayName: 'CMS Content Editor',
+        description: 'Manage website content, press releases, gallery, and care packages.',
+        permissions: ['blog:manage', 'media:manage', 'gallery:manage'],
+        isSystem: true,
+        status: 'ACTIVE',
+      }
+    ]);
 
     const passwordHash = await bcrypt.hash('SusruthaAdmin2026!', 10);
     const adminUser = await User.create({
       name: 'Susrutha Super Admin',
       email: 'admin@susruthaayurveda.com',
-      phone: '+91 96566 56736',
+      phone: '+91 9656656736',
       passwordHash,
       roleId: superAdminRole._id,
       assignedBranchIds: [],
       status: 'ACTIVE',
     });
 
-    // Create batch staff users
-    const seedUsersData = [];
-    for (let i = 1; i <= 20; i++) {
-      seedUsersData.push({
-        name: `Staff Member ${i}`,
-        email: `staff${i}@susruthaayurveda.com`,
-        phone: `+91 98470 ${10000 + i * 111}`,
-        passwordHash,
-        roleId: i % 3 === 0 ? branchAdminRole._id : i % 2 === 0 ? doctorRole._id : contentManagerRole._id,
+    // ==========================================
+    // 2. AUTHENTIC BRANCHES
+    // ==========================================
+    console.log('2. Seeding Authentic Susrutha Hospital Branches (Kattakada & Kowdiar)...');
+    const kattakadaBranch = await Branch.create({
+      name: 'Susrutha Institute of Ayurvedic Sciences (Research) and Panchakarma Hospital',
+      code: 'KTK',
+      type: 'INPATIENT_HOSPITAL',
+      tagline: '30-Bed Inpatient Panchakarma Hospital Campus & Research Institute',
+      address: {
+        street: 'Opposite Christian College, Kattakada',
+        city: 'Kattakada, Thiruvananthapuram',
+        state: 'Kerala',
+        pincode: '695572',
+        coordinates: { lat: 8.50749, lng: 77.08346 },
+      },
+      contact: {
+        phone: ['0471-2291027', '+91 9656656736', '+91 9446583803', '+91 9447892399'],
+        email: 'kattakada@susruthaayurveda.com',
+        emergencyPhone: '+91 9656656736',
+      },
+      opdTimings: '09:00 AM - 07:00 PM (OPD) | 24x7 Inpatient & Emergency Service',
+      bedCapacity: 30,
+      features: [
+        '24x7 Hospital Service & Resident Vaidya Monitoring',
+        'Panchakarma Treatment Suites & Teak Droni Tables',
+        'Susrutha Medi Tech Lab & Home Sampling Services',
+        'Ayurvedic Proctology & Kshara Sutra OT',
+        'In-House GMP Certified Pharmacy',
+        'Organic Pathya Diet Catering Service',
+        'Physiotherapy Unit & Yoga Hall'
+      ],
+      coverImage: '/images/old_site/kattakada-hospital.jpg',
+      isMainBranch: true,
+      status: 'ACTIVE',
+    });
+
+    const kowdiarBranch = await Branch.create({
+      name: 'Susrutha Panchakarma Hospital OP Outlet',
+      code: 'KWR',
+      type: 'CITY_CLINIC',
+      tagline: 'Executive OPD & Daycare Panchakarma Specialty Outlet',
+      address: {
+        street: 'Ground Floor, Urbon Heights, Opposite Income Tax Office, Pipelane Road, Kowdiar',
+        city: 'Thiruvananthapuram',
+        state: 'Kerala',
+        pincode: '695003',
+        coordinates: { lat: 8.52629, lng: 76.95845 },
+      },
+      contact: {
+        phone: ['+91 8075433728', '+91 8075483770'],
+        email: 'kowdiar@susruthaayurveda.com',
+        emergencyPhone: '+91 8075433728',
+      },
+      opdTimings: '09:00 AM - 07:00 PM (Mon - Sun)',
+      bedCapacity: 0,
+      features: [
+        'Senior Vaidya & Specialist OPD Consultation',
+        'Daycare Panchakarma & Shirodhara Rooms',
+        'Nadi Pariksha & Pulse Diagnosis',
+        'Ayurvedic Medicine Counter & Delivery',
+        'Convenient City Location with Dedicated Parking'
+      ],
+      coverImage: '/images/old_site/kowdiar-branch.jpg',
+      isMainBranch: false,
+      status: 'ACTIVE',
+    });
+
+    // ==========================================
+    // 3. CLINICAL DEPARTMENTS
+    // ==========================================
+    console.log('3. Seeding Authentic Clinical Departments...');
+    const createdDepts = await Department.create([
+      {
+        title: 'Panchakarma & Bio-Purification',
+        slug: 'panchakarma-bio-purification',
+        code: 'D101',
+        tagline: 'Classical 5-Fold Detoxification & Body Purification',
+        overview: 'Classical Kerala Panchakarma therapies designed to eliminate metabolic toxins (Ama) and restore Vata-Pitta-Kapha equilibrium.',
+        image: '/images/old_site/dept-panchakarma.jpg',
         status: 'ACTIVE',
-      });
-    }
-    await User.insertMany(seedUsersData);
-
-    // ==========================================
-    // 2. BRANCHES (50 Branches across South India)
-    // ==========================================
-    console.log('2. Seeding 50 Hospital Branches & Specialty Clinics...');
-    const cities = [
-      'Thiruvananthapuram', 'Kattakada', 'Kowdiar', 'Kollam', 'Alappuzha',
-      'Kottayam', 'Kochi', 'Thrissur', 'Palakkad', 'Kozhikode',
-      'Wayanad', 'Kannur', 'Kasarkod', 'Pathanamthitta', 'Idukki',
-      'Varkala', 'Neyyattinkara', 'Kazhakkoottam', 'Attingal', 'Nedumangad',
-      'Changanassery', 'Muvattupuzha', 'Perumbavoor', 'Angamaly', 'Guruvayur',
-      'Tirur', 'Manjeri', 'Thalassery', 'Vadakara', 'Kanhangad', 'Punalur', 'Cherthala',
-      'Bengaluru Indiranagar', 'Bengaluru Koramangala', 'Chennai Adyar', 'Chennai T-Nagar',
-      'Coimbatore', 'Madurai', 'Mysuru', 'Mangaluru', 'Hyderabad Jubilee Hills',
-      'Pondicherry', 'Salem', 'Tiruchirappalli', 'Kumbakonam', 'Kanyakumari',
-      'Nagercoil', 'Vellore', 'Erode', 'Tiruppur'
-    ];
-
-    const branchSeedDocs = [];
-    for (let i = 0; i < 50; i++) {
-      const city = cities[i];
-      const code = (city.replace(/[^A-Z]/gi, '').substring(0, 3).toUpperCase()) + (i > 0 ? (i + 1) : '');
-      const isInpatient = i % 3 === 0;
-
-      branchSeedDocs.push({
-        name: `Susrutha Ayurveda ${city} ${isInpatient ? 'Inpatient Hospital Campus' : 'Specialty Clinic'}`,
-        code: i === 0 ? 'KTK' : i === 1 ? 'KWR' : code,
-        type: isInpatient ? 'INPATIENT_HOSPITAL' : 'CITY_CLINIC',
-        tagline: isInpatient ? `${30 + (i % 5) * 10}-Bed Inpatient Panchakarma Hospital Campus` : `Executive OPD & Daycare Panchakarma Specialty Center`,
-        address: {
-          street: `${city} Main Hospital Avenue, Sector ${i + 1}`,
-          city: city,
-          state: i < 32 ? 'Kerala' : i < 40 ? 'Karnataka' : 'Tamil Nadu',
-          pincode: `${695000 + i * 17}`,
-          coordinates: { lat: 8.5 + i * 0.05, lng: 76.9 + i * 0.05 },
-        },
-        contact: {
-          phone: [`+91 96566 ${56736 + i}`, `+91 471 ${2290256 + i}`],
-          email: `${city.toLowerCase().replace(/[^a-z0-9]/g, '')}@susruthaayurveda.com`,
-          emergencyPhone: `+91 96566 ${56736 + i}`,
-        },
-        opdTimings: '08:00 AM - 08:00 PM (Mon - Sun)',
-        bedCapacity: isInpatient ? 30 + (i % 5) * 10 : 0,
-        features: [
-          'Authentic Kerala Panchakarma Detox',
-          'Vaidya Consultation & Nadi Pariksha',
-          'GMP Certified In-House Pharmacy',
-          '24x7 Resident Doctor & Nursing Care',
-          'Private Organic Diet Catering'
-        ],
-        coverImage: getImg(IMAGES.hospital, i),
-        isMainBranch: i === 0,
+      },
+      {
+        title: 'Kayachikitsa (Internal Medicine)',
+        slug: 'kayachikitsa-internal-medicine',
+        code: 'D102',
+        tagline: 'Ayurvedic General Medicine & Metabolism Care',
+        overview: 'Specialized treatment for chronic metabolic, gastrointestinal, and systemic disorders.',
+        image: '/images/old_site/dept-kayachikitsa.jpg',
         status: 'ACTIVE',
-      });
-    }
-    const createdBranches = await Branch.insertMany(branchSeedDocs);
-
-    // ==========================================
-    // 3. DEPARTMENTS (40 Clinical Specialty Departments)
-    // ==========================================
-    console.log('3. Seeding 40 Clinical Specialty Departments...');
-    const deptTitles = [
-      'Panchakarma & Bio-Purification', 'Kayachikitsa (Internal Medicine)', 'Neurological & Stroke Rehabilitation',
-      'Spine & Musculoskeletal Health', 'Prasuti Tantra (Gynaecology & Infertility)', 'Shalya Tantra (Kshara Sutra)',
-      'Shalakya Tantra (ENT & Vision)', 'Twak Roga (Dermatology & Psoriasis)', 'Kaumarabhritya (Pediatrics)',
-      'Rasayana & Anti-Aging', 'Vajikarana & Reproductive Health', 'Swasthavritta & Preventive Health',
-      'Agada Tantra (Toxicology & Detox)', 'Marma Chikitsa (Vulnerology)', 'Manovaha (Ayurvedic Psychiatry)',
-      'Cardio-Metabolic Care', 'Gastrointestinal & Liver Care', 'Renal & Urological Health',
-      'Respiratory & Allergy Care', 'Onco-Supportive Ayurveda Care', 'Geriatric & Elderly Care',
-      'Sports Injury & Joint Rehab', 'Immune Boosting & Post-Viral Care', 'Postnatal & Mother Care',
-      'Hair Care & Alopecia Therapy', 'Dietetics & Pathya Ahara', 'Diabetic Foot & Vascular Care',
-      'Weight Management & Sthoulya', 'Thyroid & Endocrine Care', 'Rheumatology & Autoimmune',
-      'Sleep Medicine & Insomnia Care', 'Ayurvedic Botanical Science', 'Kshara Sutra Proctology Unit',
-      'Ayurvedic Ophthalmology Care', 'Vaidya Diagnostic & Nadi Pariksha', 'Ayurvedic Dental & Mukha Roga',
-      'Post-Surgical Ayurvedic Recovery', 'Stress Management & Soundarya', 'Pediatric Neuro-Developmental Care',
-      'Ayurvedic Genomic & Epigenetic Health'
-    ];
-
-    const deptSeedDocs = [];
-    for (let i = 0; i < 40; i++) {
-      const title = deptTitles[i];
-      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      const code = `D${i + 101}`;
-
-      deptSeedDocs.push({
-        title,
-        slug,
-        code,
-        tagline: `Specialized Research-Backed Ayurvedic Care for ${title}`,
-        overview: `Comprehensive Kerala Ayurvedic protocols, classical formulations, and purification therapies for ${title} supervised by expert senior Vaidyas.`,
-        image: getImg(IMAGES.nature, i),
+      },
+      {
+        title: 'Neck, Back & Joint Problems',
+        slug: 'neck-back-joint-problems',
+        code: 'D103',
+        tagline: 'Spine & Musculoskeletal Rehabilitation',
+        overview: 'Comprehensive care for Spondylosis, Disc Prolapse, Sciatica, and Joint Degeneration.',
+        image: '/images/old_site/dept-joint.jpg',
         status: 'ACTIVE',
-      });
-    }
-    const createdDepts = await Department.insertMany(deptSeedDocs);
+      },
+      {
+        title: 'Stroke & Neurological Rehabilitation',
+        slug: 'stroke-neurological-rehabilitation',
+        code: 'D104',
+        tagline: 'Neurological Recovery & Post-Stroke Care',
+        overview: 'Post-stroke palliative care protocols to regenerate damaged nerve functions and restore motor mobility.',
+        image: '/images/old_site/dept-stroke.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Rheumatology',
+        slug: 'rheumatology',
+        code: 'D105',
+        tagline: 'Autoimmune & Connective Tissue Disorder Care',
+        overview: 'Ayurvedic management of Rheumatoid Arthritis, Ankylosing Spondylitis, and Gout.',
+        image: '/images/old_site/dept-rheumatology.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Prasooti Tantra & Stree Roga (Women Health & Fertility)',
+        slug: 'prasooti-tantra-stree-roga',
+        code: 'D106',
+        tagline: 'Ayurvedic Gynaecology, Infertility & Postnatal Care',
+        overview: 'Specialized care for PCOS, Hormonal Infertility, Uterine Fibroids, and Postnatal Mother & Baby Care.',
+        image: '/images/old_site/dept-women-fertility.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Susrutha Proctology Unit (Ano Rectal Care)',
+        slug: 'susrutha-proctology-unit',
+        code: 'D107',
+        tagline: 'Kshara Sutra Non-Surgical Anorectal Surgery',
+        overview: 'Pioneering Kshara Sutra ligation procedure for permanent cure of Piles, Anal Fistula, and Fissures.',
+        image: '/images/old_site/dept-proctology.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Preventive Medicine & Rejuvenation',
+        slug: 'preventive-medicine-rejuvenation',
+        code: 'D108',
+        tagline: 'Swasthavritta & Rasayana Immunity Care',
+        overview: 'Lifestyle consultation, anti-aging Rasayana regimens, and immune-boosting therapies.',
+        image: '/images/old_site/dept-general-medicine.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Susrutha Medi Tech Lab Services',
+        slug: 'susrutha-medi-tech-lab-services',
+        code: 'D109',
+        tagline: 'Full-Fledged Diagnostic Investigations',
+        overview: 'Blood and body fluid diagnostic facility supporting outpatient and inpatient care with 5km home sampling.',
+        image: '/images/old_site/ayurveda-health1.jpg',
+        status: 'ACTIVE',
+      }
+    ]);
+
+    // Map department IDs
+    const deptMap: Record<string, mongoose.Types.ObjectId> = {};
+    createdDepts.forEach((d) => { deptMap[d.slug] = d._id; });
 
     // ==========================================
-    // 4. DOCTORS (100 Expert Physicians)
+    // 4. AUTHENTIC DOCTORS
     // ==========================================
-    console.log('4. Seeding 100 Expert Doctors with unique profiles & availability...');
-    const firstNames = ['Krishnakumar', 'Sreeja', 'Anoop', 'Lakshmi', 'Ramesh', 'Divya', 'Hari', 'Gayathri', 'Madhavan', 'Preetha', 'Anand', 'Saritha', 'Vishnu', 'Revathy', 'Jayakrishnan', 'Anupama', 'Gopakumar', 'Deepa', 'Santhosh', 'Sunitha', 'Rajeev', 'Vineetha', 'Arjun', 'Ambili', 'Gokul', 'Reshma', 'Sidharth', 'Parvathy', 'Kiran', 'Aswathy', 'Unnikrishnan', 'Devika', 'Manikandan', 'Bhavana', 'Subhash', 'Gautam', 'Kavitha', 'Nikhil', 'Pooja', 'Siddharth', 'Meera', 'Rohan', 'Swati', 'Vikram', 'Ananya', 'Tarun', 'Nandini', 'Pranav', 'Shruti', 'Aditya'];
-    const lastNames = ['K.', 'Krishna', 'Varma', 'Nair', 'Nambiar', 'Chandran', 'Pillai', 'Devi', 'Kutty', 'Suresh', 'Padmanabhan', 'Namboothiri', 'Mohan', 'Unnithan', 'Menon', 'Rajan', 'Kumar', 'Panicker', 'Das', 'Thampi', 'Menon', 'Babu', 'Gopal', 'Kartha', 'Shenoy', 'Bhat', 'Hegde', 'Rao', 'Reddy', 'Choudhury'];
-
-    const doctorSeedDocs = [];
-    for (let i = 0; i < 100; i++) {
-      const fname = firstNames[i % firstNames.length];
-      const lname = lastNames[i % lastNames.length];
-      const name = `Dr. ${fname} ${lname} ${i > 50 ? 'Vaidya' : ''}`.trim();
-      const slug = `dr-${fname.toLowerCase()}-${lname.toLowerCase().replace(/[^a-z0-9]/g, '')}-${i + 1}`;
-      const dept = createdDepts[i % createdDepts.length];
-      const assignedBranch1 = createdBranches[i % createdBranches.length]._id;
-      const assignedBranch2 = createdBranches[(i + 1) % createdBranches.length]._id;
-
-      doctorSeedDocs.push({
-        name,
-        slug,
-        designation: i === 0 ? 'Chief Medical Officer & Founder' : i % 5 === 0 ? 'Chief Medical Officer' : i % 3 === 0 ? 'Senior Consultant Physician' : 'Consultant Ayurvedic Physician',
-        qualifications: i % 2 === 0 ? 'BAMS, MD (Ayurveda)' : 'BAMS, MS (Ayurveda), Ph.D.',
-        experienceYears: 5 + (i % 30),
-        registrationNumber: `TCMC/AYU/${12000 + i * 137}`,
-        departmentId: dept._id,
-        assignedBranchIds: [assignedBranch1, assignedBranch2],
-        bio: `${name} is an esteemed Vaidya with over ${5 + (i % 30)} years of clinical excellence specializing in ${dept.title}. Recognized for pioneering integration of traditional Kerala Panchakarma with modern evidence-based clinical diagnostics.`,
-        consultationFee: 400 + (i % 8) * 100,
-        specialties: [dept.title, 'Panchakarma Detox', 'Nadi Pariksha', 'Chronic Pain Care'],
-        languagesSpoken: ['Malayalam', 'English', i % 2 === 0 ? 'Hindi' : 'Tamil', i % 4 === 0 ? 'Kannada' : 'Sanskrit'],
-        photoUrl: getImg(IMAGES.doctors, i),
-        photo: getImg(IMAGES.doctors, i),
+    console.log('4. Seeding 9 Authentic Susrutha Physicians...');
+    const doctorsData = [
+      {
+        name: 'Dr. Krishnakumar K.',
+        slug: 'dr-krishnakumar-k',
+        designation: 'Managing Director & Chief Physician',
+        qualifications: 'MD (Ayurveda)',
+        experienceYears: 28,
+        registrationNumber: 'TCMC/AYU/8942',
+        departmentId: deptMap['neck-back-joint-problems'],
+        assignedBranchIds: [kattakadaBranch._id],
+        bio: 'Dr. Krishnakumar K. is the Managing Director and Chief Physician of Susrutha Institute of Ayurvedic Sciences. Son of legendary Prof. Dr. Krishnankutty Nair, he has nearly 3 decades of clinical experience in Panchakarma, Spine & Joint Care, and chronic disease management.',
+        consultationFee: 500,
+        specialties: ['Spine Care', 'Joint Problems', 'Panchakarma', 'Chronic Diseases'],
+        languagesSpoken: ['Malayalam', 'English', 'Hindi', 'Tamil'],
+        photoUrl: '/images/old_site/dr-krishnakumar.jpg',
+        photo: '/images/old_site/dr-krishnakumar.jpg',
         availability: [
-          {
-            branchId: assignedBranch1,
-            days: ['Mon', 'Wed', 'Fri', 'Sat'],
-            timeSlots: ['09:00 AM - 01:00 PM', '04:00 PM - 07:00 PM'],
-          },
-          {
-            branchId: assignedBranch2,
-            days: ['Tue', 'Thu'],
-            timeSlots: ['10:00 AM - 02:00 PM'],
-          }
+          { branchId: kattakadaBranch._id, days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], timeSlots: ['On Prior Appointment'] }
         ],
-        isDirector: i < 5,
-        isFeatured: i < 20,
-        sortOrder: i + 1,
+        isDirector: true,
+        isFeatured: true,
+        sortOrder: 1,
         status: 'ACTIVE',
-      });
-    }
-    const createdDoctors = await Doctor.insertMany(doctorSeedDocs);
-
-    // ==========================================
-    // 5. CONDITIONS (100 Health Conditions)
-    // ==========================================
-    console.log('5. Seeding 100 Health Conditions with detailed clinical protocols...');
-    const condTitles = [
-      'Rheumatoid & Osteoarthritis', 'Cervical & Lumbar Spondylosis', 'Stroke & Hemiplegia Rehabilitation',
-      'Psoriasis & Chronic Eczema', 'PCOS & Hormonal Infertility', 'Anal Fistula & Hemorrhoids',
-      'Parkinsonism & Movement Disorders', 'Fatty Liver & Digestive IBS', 'Chronic Sinusitis & Rhinitis',
-      'Insomnia & Severe Anxiety', 'Type-2 Diabetes & Neuropathy', 'Hypertension & Vascular Care',
-      'Sciatica & Nerve Compression', 'Gouty Arthritis & Uric Acid', 'Asthma & Chronic Bronchitis',
-      'Alopecia & Severe Hair Fall', 'Post-COVID Fatigue & Weakness', 'Thyroid Dysfunction & Goitre',
-      'Obesity & Metabolic Syndrome', 'Migraine & Vascular Headaches', 'Ulcerative Colitis & Gastritis',
-      'Kidney Stones & Dysuria', 'Varicose Veins & Venous Ulcers', 'Bell Palsy & Facial Paralysis',
-      'Fibromyalgia & Chronic Muscle Pain', 'Ankylosing Spondylitis', 'Uterine Fibroids & Menorrhagia',
-      'Allergic Dermatitis & Hives', 'Calcaneal Spur & Heel Pain', 'Frozen Shoulder & Bursitis',
-      'Vertigo & Meniere Disease', 'Kidney Failure (Early Stage Support)', 'Autoimmune Lupus Care',
-      'Chronic Fatigue Syndrome', 'Erectile Dysfunction & Low Vitality', 'Degenerative Disc Disease',
-      'Carpal Tunnel Syndrome', 'Trigeminal Neuralgia', 'Acid Peptic Disorder & GERD',
-      'Psoriatic Arthritis', 'Scoliosis & Spinal Curvature', 'Multiple Sclerosis Support Care',
-      'Chronic Prostatitis & BPH', 'Male Factor Infertility & Oligospermia', 'Endometriosis Pain Management',
-      'Eczematous Dermatitis', 'Tinnitus & Hearing Decline', 'Post-Herpetic Neuralgia',
-      'Peripheral Arterial Disease', 'Metabolic Non-Alcoholic Fatty Liver'
+      },
+      {
+        name: 'Dr. Sreeja Krishna S.',
+        slug: 'dr-sreeja-krishna-s',
+        designation: 'Director & Senior Consultant Physician',
+        qualifications: 'BAMS, MBA Hospital Management',
+        experienceYears: 22,
+        registrationNumber: 'TCMC/AYU/10412',
+        departmentId: deptMap['preventive-medicine-rejuvenation'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        bio: 'Dr. Sreeja Krishna S. is Director and Senior Consultant Physician at Susrutha Ayurveda. She specializes in Women’s Health, General Medicine, and Hospital Administration, upholding the legacy of clinical excellence.',
+        consultationFee: 450,
+        specialties: ['Women’s Health & Fertility', 'Panchakarma', 'General Medicine', 'Preventive Care'],
+        languagesSpoken: ['Malayalam', 'English', 'Tamil'],
+        photoUrl: '/images/old_site/dr-sreejakrishna.jpg',
+        photo: '/images/old_site/dr-sreejakrishna.jpg',
+        availability: [
+          { branchId: kattakadaBranch._id, days: ['Tue', 'Thu', 'Sat'], timeSlots: ['09:00 AM - 04:00 PM'] },
+          { branchId: kowdiarBranch._id, days: ['Wed'], timeSlots: ['09:00 AM - 05:00 PM'] }
+        ],
+        isDirector: true,
+        isFeatured: true,
+        sortOrder: 2,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. Priyanka R.',
+        slug: 'dr-priyanka-r',
+        designation: 'Ayurvedic Gynaecologist & Obstetrician',
+        qualifications: 'BAMS, MS (Ayurveda)',
+        experienceYears: 15,
+        registrationNumber: 'TCMC/AYU/14230',
+        departmentId: deptMap['prasooti-tantra-stree-roga'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        bio: 'Dr. Priyanka R. is a renowned specialist in Prasooti & Stree Roga (Ayurvedic Gynaecology & Obstetrics) and Postnatal Care. She leads Susrutha’s Post Natal & Mother Care unit.',
+        consultationFee: 400,
+        specialties: ['Women’s Health & Fertility', 'Post Natal Care', 'Gynecological Disorders', 'PCOS Care'],
+        languagesSpoken: ['Malayalam', 'English', 'Hindi'],
+        photoUrl: '/images/old_site/dr-priyanka.jpg',
+        photo: '/images/old_site/dr-priyanka.jpg',
+        availability: [
+          { branchId: kattakadaBranch._id, days: ['Sun', 'Mon', 'Wed', 'Fri'], timeSlots: ['09:00 AM - 05:00 PM'] },
+          { branchId: kowdiarBranch._id, days: ['Tue'], timeSlots: ['09:00 AM - 05:00 PM'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 3,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. M. K. Sasidharan',
+        slug: 'dr-m-k-sasidharan',
+        designation: 'Visiting Senior Professor & Panchakarma Consultant',
+        qualifications: 'BAMS, MD (Ayurveda)',
+        experienceYears: 42,
+        registrationNumber: 'TCMC/AYU/4102',
+        departmentId: deptMap['panchakarma-bio-purification'],
+        assignedBranchIds: [kowdiarBranch._id],
+        bio: 'Dr. M. K. Sasidharan is Former Professor at Govt. Ayurveda College Trivandrum and Former Head of Govt. Panchakarma Hospital Poojappura. He provides expert clinical consultations at Kowdiar Center.',
+        consultationFee: 600,
+        specialties: ['Panchakarma Bio-Purification', 'Neurological Rehab', 'Complex Musculoskeletal Diseases'],
+        languagesSpoken: ['Malayalam', 'English', 'Sanskrit'],
+        photoUrl: '/images/old_site/doctor-avatar.jpg',
+        photo: '/images/old_site/doctor-avatar.jpg',
+        availability: [
+          { branchId: kowdiarBranch._id, days: ['Sat'], timeSlots: ['09:00 AM - 01:00 PM'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 4,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. Vinaya Babu B.',
+        slug: 'dr-vinaya-babu-b',
+        designation: 'Senior Consultant Physician (Chief Medical Officer Rtd Govt. of Kerala)',
+        qualifications: 'BSc, BAMS',
+        experienceYears: 38,
+        registrationNumber: 'TCMC/AYU/5290',
+        departmentId: deptMap['kayachikitsa-internal-medicine'],
+        assignedBranchIds: [kowdiarBranch._id],
+        bio: 'Dr. Vinaya Babu B. served as Chief Medical Officer in the Govt. of Kerala. He brings 38+ years of expertise in clinical diagnosis and chronic disease care.',
+        consultationFee: 500,
+        specialties: ['Kayachikitsa General Medicine', 'Rheumatology', 'Preventive Healthcare'],
+        languagesSpoken: ['Malayalam', 'English'],
+        photoUrl: '/images/old_site/dr-vinaya-babu.jpg',
+        photo: '/images/old_site/dr-vinaya-babu.jpg',
+        availability: [
+          { branchId: kowdiarBranch._id, days: ['Mon', 'Thu'], timeSlots: ['09:00 AM - 01:00 PM'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 5,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. Dipu Sukumar',
+        slug: 'dr-dipu-sukumar',
+        designation: 'Ayurveda Proctologist & Kshara Sutra Specialist',
+        qualifications: 'BAMS, MS (Ayurveda Shalya)',
+        experienceYears: 14,
+        registrationNumber: 'TCMC/AYU/15102',
+        departmentId: deptMap['susrutha-proctology-unit'],
+        assignedBranchIds: [kattakadaBranch._id],
+        bio: 'Dr. Dipu Sukumar leads the Susrutha Proctology Unit, specializing in non-surgical Kshara Sutra ligation for Piles, Anal Fistula, and Fissures.',
+        consultationFee: 450,
+        specialties: ['Proctology & Kshara Sutra', 'Piles & Fistula Care', 'Anorectal Surgery Recovery'],
+        languagesSpoken: ['Malayalam', 'English', 'Tamil'],
+        photoUrl: '/images/old_site/doctor-avatar.jpg',
+        photo: '/images/old_site/doctor-avatar.jpg',
+        availability: [
+          { branchId: kattakadaBranch._id, days: ['Mon', 'Wed', 'Fri'], timeSlots: ['On Prior Appointment'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 6,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. Nithya P.',
+        slug: 'dr-nithya-p',
+        designation: 'Consultant Ayurvedic Physician',
+        qualifications: 'BAMS',
+        experienceYears: 9,
+        registrationNumber: 'TCMC/AYU/18204',
+        departmentId: deptMap['kayachikitsa-internal-medicine'],
+        assignedBranchIds: [kowdiarBranch._id],
+        bio: 'Dr. Nithya P. is a dedicated consultant Vaidya providing OPD consultations and panchakarma care planning at Susrutha Kowdiar Center.',
+        consultationFee: 350,
+        specialties: ['General Medicine', 'Stress & Insomnia', 'Dermatology & Skin Care'],
+        languagesSpoken: ['Malayalam', 'English'],
+        photoUrl: '/images/old_site/dr-nithya.jpg',
+        photo: '/images/old_site/dr-nithya.jpg',
+        availability: [
+          { branchId: kowdiarBranch._id, days: ['Sat'], timeSlots: ['09:00 AM - 03:00 PM'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 7,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. Roopasree',
+        slug: 'dr-roopasree',
+        designation: 'Resident Medical Officer (RMO)',
+        qualifications: 'BAMS',
+        experienceYears: 7,
+        registrationNumber: 'TCMC/AYU/19310',
+        departmentId: deptMap['panchakarma-bio-purification'],
+        assignedBranchIds: [kattakadaBranch._id],
+        bio: 'Dr. Roopasree serves as Resident Medical Officer at Kattakada 30-bed Inpatient Hospital, ensuring 24x7 emergency and inpatient patient monitoring.',
+        consultationFee: 300,
+        specialties: ['Inpatient Care & Monitoring', 'Panchakarma Management', 'Emergency Ayurveda'],
+        languagesSpoken: ['Malayalam', 'English', 'Tamil'],
+        photoUrl: '/images/old_site/dr-roopasree.jpg',
+        photo: '/images/old_site/dr-roopasree.jpg',
+        availability: [
+          { branchId: kattakadaBranch._id, days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], timeSlots: ['24X7 Resident Duty'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 8,
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Dr. K. Kaveri',
+        slug: 'dr-k-kaveri',
+        designation: 'Consultant Medical Officer',
+        qualifications: 'BAMS',
+        experienceYears: 8,
+        registrationNumber: 'TCMC/AYU/18902',
+        departmentId: deptMap['preventive-medicine-rejuvenation'],
+        assignedBranchIds: [kattakadaBranch._id],
+        bio: 'Dr. K. Kaveri is an experienced Vaidya focusing on preventive medicine, dietetics, and panchakarma bio-purification therapies.',
+        consultationFee: 350,
+        specialties: ['Preventive Medicine', 'Kayachikitsa', 'Dietetics & Lifestyle'],
+        languagesSpoken: ['Malayalam', 'English'],
+        photoUrl: '/images/old_site/dr-k-kaveri.jpg',
+        photo: '/images/old_site/dr-k-kaveri.jpg',
+        availability: [
+          { branchId: kattakadaBranch._id, days: ['Mon', 'Wed', 'Fri'], timeSlots: ['09:00 AM - 04:00 PM'] }
+        ],
+        isDirector: false,
+        isFeatured: true,
+        sortOrder: 9,
+        status: 'ACTIVE',
+      }
     ];
 
-    const conditionSeedDocs = [];
-    for (let i = 0; i < 100; i++) {
-      const baseTitle = condTitles[i % condTitles.length];
-      const title = i >= 50 ? `${baseTitle} (Advanced Protocol #${i - 49})` : baseTitle;
-      const slug = `condition-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-
-      conditionSeedDocs.push({
-        title,
-        slug,
-        category: i % 5 === 0 ? 'Spine & Joint' : i % 4 === 0 ? 'Neurological' : i % 3 === 0 ? 'Skin & Immunity' : 'Metabolic & Chronic',
-        shortDescription: `Non-surgical Kerala Ayurvedic recovery protocol and herbal detox remedies for ${title}.`,
-        fullDescription: `Comprehensive inpatient and outpatient Ayurvedic treatment strategy for ${title}. Integrates classical Panchakarma, custom Kashayams, lifestyle modifications, and Pathya Ahara dietary plans under senior doctor supervision.`,
-        ayurvedicRootCause: `Agni Manya and aggravated Vata-Pitta-Kapha Doshas disturbing Dhatu Agni and causing Srotorodha (micro-channel blockages).`,
-        symptoms: ['Localized & Generalized Pain', 'Stiffness & Reduced Mobility', 'Chronic Fatigue & Inflammation', 'Digestive Impairment'],
-        coverImage: getImg(IMAGES.therapy, i),
-        assignedBranchIds: [createdBranches[i % createdBranches.length]._id, createdBranches[(i + 1) % createdBranches.length]._id],
-        faqs: [
-          { question: `What is the expected treatment duration for ${title}?`, answer: `Standard inpatient Panchakarma programs range from 14 to 28 days depending on severity.` },
-          { question: `Are medicines safe for long-term usage?`, answer: `All prescribed herbal Kashayams and Arishtams are 100% GMP certified and safe.` }
-        ],
-        isFeatured: i < 30,
-        status: 'published',
-      });
-    }
-    const createdConditions = await Condition.insertMany(conditionSeedDocs);
+    const createdDoctors = await Doctor.create(doctorsData);
 
     // ==========================================
-    // 6. TREATMENTS (100 Classical Treatments)
+    // 5. AUTHENTIC CARE PACKAGES
     // ==========================================
-    console.log('6. Seeding 100 Classical & Specialty Panchakarma Treatments...');
-    const treatNames = [
-      'Abhyangam (Warm Oil Therapy)', 'Shirodhara (Oil Stream Therapy)', 'Elakizhi (Herbal Leaf Poultice)',
-      'Kadi Vasthi (Lumbar Spine Pool)', 'Njavarakizhi (Rice Bolus Steam)', 'Pizhichil (Royal Medicated Oil Bath)',
-      'Takradhara (Buttermilk Stream)', 'Nasyam (Therapeutic Nasal Drops)', 'Kshara Sutra Ligation',
-      'Janu Vasthi (Knee Joint Pool)', 'Griva Vasthi (Neck Spine Pool)', 'Kashaya Vasthi (Herbal Enema)',
-      'Sneha Vasthi (Oil Enema)', 'Vamana (Therapeutic Emesis)', 'Virechana (Therapeutic Purgation)',
-      'Raktamokshana (Leech Therapy)', 'Udwarthanam (Dry Herbal Powder Scrub)', 'Ksheeradradhara (Medicated Milk Pour)',
-      'Netra Tarpana (Eye Rejuvenation Bath)', 'Karnapoorana (Ear Oil Drip)', 'Sirovasthi (Cranial Oil Retention Pool)',
-      'Podikizhi (Powder Bolus Fomentation)', 'Mutthakizhi (Egg Bolus Massage)', 'Dhanyamladhara (Warm Herbal Liquid Bath)',
-      'Kizhi (Specialized Bolus Fomentation)', 'Thalam (Scalp Herbal Paste Coating)', 'Lepam (Herbal Medicinal Paste Application)',
-      'Pichu (Oil Soaked Sponge Placement)', 'Avagaha Swedam (Medicated Tub Bath)', 'Ksheeradhoopam (Medicated Milk Steam)',
-      'Yoni Prakshalanam (Douche Therapy)', 'Shiroabhyangam (Head Massage)', 'Padabhyangam (Foot Massage)',
-      'Kaya Sekam (Full Body Pouring)', 'Tarpana (Tissue Nourishing Bath)'
+    console.log('5. Seeding 12 Authentic Susrutha Care Packages...');
+    const packagesData = [
+      {
+        title: 'Ano Rectal Care Package (Piles & Fistula)',
+        slug: 'ano-rectal-care-package',
+        subtitle: 'Kshara Sutra & Non-Surgical Anorectal Healing',
+        durationDays: 7,
+        overview: 'Specialized Ayurvedic treatment for Hemorrhoids (Piles), Anal Fistula, and Fissures using classical Kshara Sutra ligation, Kashaya Parisheka, and soothing herbal medicines.',
+        inclusions: ['Specialist Proctologist Consultations', 'Kshara Sutra Ligation Procedure', 'Daily Anorectal Sitz Baths & Dressing', 'Pain Relief Herbal Formulations', 'Post-Procedure Pathya Diet Plan'],
+        targetAilments: ['Piles', 'Fistula-in-Ano', 'Anal Fissures', 'Rectal Prolapse'],
+        price: 18000,
+        image: '/images/old_site/dept-proctology.jpg',
+        coverImage: '/images/old_site/dept-proctology.jpg',
+        galleryImages: ['/images/old_site/dept-proctology.jpg', '/images/old_site/kattakada-hospital.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 1,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Rejuvenation Package',
+        slug: 'rejuvenation-package',
+        subtitle: 'Authentic Kerala Rasayana & Detox Program',
+        durationDays: 7,
+        overview: 'Revitalize your body, mind, and spirit through authentic Kerala Rasayana Chikitsa, Abhyangam, Shirodhara, and Herbal Steam baths to enhance vitality and cellular longevity.',
+        inclusions: ['Daily Vaidya Consultations', 'Abhyangam 4-Hand Synchronization Massage', 'Shirodhara Stream Therapy', 'Swedanam Steam Bath', 'Rasayana Internal Medicines'],
+        targetAilments: ['Premature Aging', 'Fatigue & Burnout', 'Low Immunity', 'General Debility'],
+        price: 22000,
+        image: '/images/old_site/dept-panchakarma.jpg',
+        coverImage: '/images/old_site/dept-panchakarma.jpg',
+        galleryImages: ['/images/old_site/dept-panchakarma.jpg', '/images/old_site/ayurveda-health1.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 2,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Post Natal Care Package (OP/IP)',
+        slug: 'post-natal-care-package',
+        subtitle: 'Prasooti & Stree Roga Mother & Baby Recovery Care',
+        durationDays: 14,
+        overview: 'Comprehensive post-partum Ayurvedic care for new mothers to restore pelvic strength, promote lactation, relieve physical strain, and enhance newborn immunity under female specialist Vaidyas.',
+        inclusions: ['Obstetric Vaidya Supervision', 'Postnatal Abhyangam & Belly Wrapping (Stanya Janana)', 'Medicated Herbal Baths (Vethu)', 'Lactation Enhancing Kashayams', 'Newborn Oil Massage Guidance'],
+        targetAilments: ['Postpartum Fatigue', 'Uterine Involution Support', 'Lactation Deficit', 'Pelvic Instability'],
+        price: 35000,
+        image: '/images/old_site/dept-prasooti.jpg',
+        coverImage: '/images/old_site/dept-prasooti.jpg',
+        galleryImages: ['/images/old_site/dept-prasooti.jpg', '/images/old_site/dept-women-fertility.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 3,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Low Back Pain Care Package',
+        slug: 'low-back-pain-care-package',
+        subtitle: 'Kadi Vasthi & Lumbar Spine Rehabilitation',
+        durationDays: 7,
+        overview: 'Focused treatment program for Lumbar Spondylosis, Sciatica, and Intervertebral Disc Prolapse using Kadi Vasthi, Elakizhi, and nerve-strengthening herbal oils.',
+        inclusions: ['Senior Spine Doctor Consultations', 'Daily Kadi Vasthi (Lumbar Oil Retention Pool)', 'Elakizhi Leaf Poultice Massage', 'Sneha Vasthi Medicated Enema', 'Spine Ergonomic Advice'],
+        targetAilments: ['Lumbar Spondylosis', 'Sciatica', 'Disc Herniation', 'Low Back Muscular Spasm'],
+        price: 24000,
+        image: '/images/old_site/dept-joint.jpg',
+        coverImage: '/images/old_site/dept-joint.jpg',
+        galleryImages: ['/images/old_site/dept-joint.jpg', '/images/old_site/kattakada-hospital.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 4,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Neck Pain Care Package',
+        slug: 'neck-pain-care-package',
+        subtitle: 'Griva Vasthi & Cervical Spine Therapy',
+        durationDays: 7,
+        overview: 'Specialized therapy targeted at Cervical Spondylosis, Trapezitis, and upper back stiffness using warm medicated Griva Vasthi oil pools and Nasyam.',
+        inclusions: ['Spine Specialist Consultation', 'Daily Griva Vasthi (Cervical Oil Retention Pool)', 'Podikizhi Herbal Fomentation', 'Therapeutic Nasyam Drops', 'Neck Mobility Exercises'],
+        targetAilments: ['Cervical Spondylosis', 'Trapezitis', 'Numbness in Arms', 'Cervical Radiculopathy'],
+        price: 22000,
+        image: '/images/old_site/dept-joint.jpg',
+        coverImage: '/images/old_site/dept-joint.jpg',
+        galleryImages: ['/images/old_site/dept-joint.jpg', '/images/old_site/kowdiar-branch.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 5,
+        status: 'ACTIVE',
+      },
+      {
+        title: '3 Days Ayurveda Package',
+        slug: '3-days-ayurveda-package',
+        subtitle: 'Quick Express Detox & Stress Relief',
+        durationDays: 3,
+        overview: 'An express 3-day wellness getaway designed for busy professionals to relieve stress, unblock fatigue, and experience signature Abhyangam and Shirodhara therapies.',
+        inclusions: ['Physician Health Assessment', 'Daily Full Body Abhyangam', 'Shirodhara Session', 'Herbal Steam Bath', 'Herbal Wellness Drinks'],
+        targetAilments: ['Workplace Stress', 'Jet Lag', 'Mild Insomnia', 'Muscle Tension'],
+        price: 9500,
+        image: '/images/old_site/ayurveda-health1.jpg',
+        coverImage: '/images/old_site/ayurveda-health1.jpg',
+        galleryImages: ['/images/old_site/ayurveda-health1.jpg', '/images/old_site/slider-1.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 6,
+        status: 'ACTIVE',
+      },
+      {
+        title: '5 Days Ayurveda Package',
+        slug: '5-days-ayurveda-package',
+        subtitle: 'Short Renewal & Body Purifying Program',
+        durationDays: 5,
+        overview: 'A 5-day short-stay panchakarma program providing deep tissue relaxation, skin rejuvenation, and digestive fire (Agni) correction.',
+        inclusions: ['Vaidya Pulse Diagnosis', '2x Daily Panchakarma Therapies', 'Takradhara or Shirodhara', 'Pathya Ayurvedic Meals', 'Personalized Herbal Prescriptions'],
+        targetAilments: ['Stress & Anxiety', 'Digestive Sluggishness', 'Body Stiffness', 'Skin Dullness'],
+        price: 16000,
+        image: '/images/old_site/ayurveda-health2.jpg',
+        coverImage: '/images/old_site/ayurveda-health2.jpg',
+        galleryImages: ['/images/old_site/ayurveda-health2.jpg', '/images/old_site/slider-2.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 7,
+        status: 'ACTIVE',
+      },
+      {
+        title: '7 Days Ayurveda Care Package',
+        slug: '7-days-ayurveda-care-package',
+        subtitle: 'Full Panchakarma Detox & Bio-Purification',
+        durationDays: 7,
+        overview: 'The golden standard 7-day inpatient detox program following classic Purvakarma (Snehana & Swedana) and Shodhana bio-purification techniques.',
+        inclusions: ['Daily Senior Doctor Visits', 'Customized 7-Day Panchakarma Schedule', 'Virechana or Vasthi Therapy', 'Private Room Accommodation', 'Organic Ayurvedic Diet Plan'],
+        targetAilments: ['Dosha Imbalance', 'Chronic Pain', 'Metabolic Toxins', 'Hypertension'],
+        price: 26000,
+        image: '/images/old_site/dept-panchakarma.jpg',
+        coverImage: '/images/old_site/dept-panchakarma.jpg',
+        galleryImages: ['/images/old_site/dept-panchakarma.jpg', '/images/old_site/kattakada-hospital.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 8,
+        status: 'ACTIVE',
+      },
+      {
+        title: '16 Days Ayurveda Care Package',
+        slug: '16-days-ayurveda-care-package',
+        subtitle: 'Deep Tissue Purification & Chronic Disease Recovery',
+        durationDays: 16,
+        overview: 'Comprehensive 16-day inpatient medical recovery course for severe arthritis, neurological deficits, stroke rehabilitation, and chronic autoimmune disorders.',
+        inclusions: ['Comprehensive Vaidya Team Supervision', 'Full 5-Fold Panchakarma Therapies', 'Pizhichil & Njavarakizhi Courses', 'Deluxe Room Accommodation', 'Post-Discharge Medicine Kit'],
+        targetAilments: ['Stroke Recovery', 'Rheumatoid Arthritis', 'Paraplegia', 'Severe Psoriasis'],
+        price: 58000,
+        image: '/images/old_site/kattakada-hospital.jpg',
+        coverImage: '/images/old_site/kattakada-hospital.jpg',
+        galleryImages: ['/images/old_site/kattakada-hospital.jpg', '/images/old_site/dept-stroke.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 9,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Psoriasis & Other Skin Disease Care',
+        slug: 'psoriasis-other-skin-disease-care',
+        subtitle: 'Takradhara & Raktamokshana Skin Healing',
+        durationDays: 14,
+        overview: 'Specialized clinical protocol for Psoriasis, Eczema, and Allergic Dermatitis incorporating Takradhara (buttermilk pour), Lepam, and Raktamokshana blood purification.',
+        inclusions: ['Dermatological Vaidya Consultations', 'Daily Takradhara (Medicated Buttermilk Pour)', 'Herbal Medicinal Paste (Lepam)', 'Blood Purifying Kashayams', 'Strict Dietary Guidance'],
+        targetAilments: ['Psoriasis', 'Eczema', 'Chronic Hives', 'Allergic Dermatitis'],
+        price: 38000,
+        image: '/images/old_site/dept-kayachikitsa.jpg',
+        coverImage: '/images/old_site/dept-kayachikitsa.jpg',
+        galleryImages: ['/images/old_site/dept-kayachikitsa.jpg', '/images/old_site/ayurveda-health1.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 10,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Stress Care Package',
+        slug: 'stress-care-package',
+        subtitle: 'Mind Relaxation & Insomnia Relief Program',
+        durationDays: 7,
+        overview: 'Holistic mind-body relaxation package combining Shirodhara, Thalam, Sirovasthi, and Medicated Milk Pouring (Ksheeradhara) for sleep and anxiety disorders.',
+        inclusions: ['Ayurvedic Psychiatrist / Vaidya Consultation', 'Daily Shirodhara or Takradhara', 'Thalam Scalp Application', 'Pranayama & Meditation Sessions', 'Nervine Tonic Formulations'],
+        targetAilments: ['Insomnia', 'Chronic Stress', 'Anxiety & Panic', 'Burnout'],
+        price: 23000,
+        image: '/images/old_site/slider-1.jpg',
+        coverImage: '/images/old_site/slider-1.jpg',
+        galleryImages: ['/images/old_site/slider-1.jpg', '/images/old_site/slider-6.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 11,
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Tekky Package (Occupational Disorder Care)',
+        slug: 'tekky-package-occupational-disorder-care',
+        subtitle: 'Specialized Care for IT & Corporate Professionals',
+        durationDays: 7,
+        overview: 'Tailored for software engineers, desk professionals, and corporate workers suffering from Tech Neck, Carpal Tunnel Syndrome, Computer Vision Syndrome, and sedentary spinal compression.',
+        inclusions: ['Occupational Health Vaidya Consultation', 'Ergonomic Body Alignment Massage', 'Netra Tarpana Eye Rejuvenation', 'Griva & Kadi Vasthi Sessions', 'Desk Posture Guidance'],
+        targetAilments: ['Tech Neck Strain', 'Carpal Tunnel Syndrome', 'Computer Vision Strain', 'Lumbar Stiffness'],
+        price: 21000,
+        image: '/images/old_site/slider-5.jpg',
+        coverImage: '/images/old_site/slider-5.jpg',
+        galleryImages: ['/images/old_site/slider-5.jpg', '/images/old_site/dept-joint.jpg'],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        sortOrder: 12,
+        status: 'ACTIVE',
+      }
     ];
 
-    const treatmentSeedDocs = [];
-    for (let i = 0; i < 100; i++) {
-      const baseTitle = treatNames[i % treatNames.length];
-      const title = i >= 35 ? `${baseTitle} — Specialty Variant #${i + 1}` : baseTitle;
-      const slug = `treatment-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      const doc1 = createdDoctors[i % createdDoctors.length]._id;
-      const doc2 = createdDoctors[(i + 1) % createdDoctors.length]._id;
+    await CarePackage.create(packagesData);
 
-      treatmentSeedDocs.push({
-        title,
-        slug,
-        category: i % 4 === 0 ? 'Panchakarma' : i % 3 === 0 ? 'Kizhi & Fomentation' : i % 2 === 0 ? 'Vasthi' : 'Dhara',
-        malayalam: 'ആയൂർവേദ ചികിത്സാ രീതി',
-        shortDescription: `Classical Kerala Ayurvedic ${title} therapy conducted by experienced male/female Panchakarma therapists.`,
-        fullDescription: `Traditional ${title} utilizing authentic herbal oils formulated in-house. Helps restore Dosha equilibrium, eliminate metabolic toxins (Ama), and improve cellular immunity.`,
-        coverImage: getImg(IMAGES.therapy, i),
-        galleryImages: [getImg(IMAGES.therapy, i), getImg(IMAGES.hospital, i)],
-        durationMinutes: 45 + (i % 4) * 15,
-        recommendedDays: 7 + (i % 4) * 7,
-        indications: ['Dosha Imbalance', 'Chronic Pain', 'Joint Stiffness', 'Stress & Burnout'],
-        benefits: ['Eliminates toxins', 'Improves blood circulation', 'Deep tissue rejuvenation', 'Relieves nerve tension'],
-        preparation: ['Light warm bath prior to session', 'Avoid heavy meals 2 hours prior'],
-        aftercare: ['Sip warm herbal water', 'Avoid direct exposure to cold wind'],
-        doctorIds: [doc1, doc2],
-        assignedBranchIds: [createdBranches[i % createdBranches.length]._id],
-        isFeatured: i < 30,
+    // ==========================================
+    // 6. AUTHENTIC CLASSICAL TREATMENTS
+    // ==========================================
+    console.log('6. Seeding Authentic Panchakarma & Dhara Treatments...');
+    const createdTreatments = await Treatment.create([
+      {
+        title: 'Shirodhara (Medicated Oil Stream)',
+        slug: 'shirodhara-medicated-oil-stream',
+        category: 'Dhara',
+        malayalam: 'ശിരോധാര',
+        shortDescription: 'Continuous pouring of warm medicated oil onto the forehead to relieve stress, insomnia, and nervous tension.',
+        fullDescription: 'Shirodhara is a classical Ayurvedic therapy where a continuous stream of warm herbal oil is poured on the forehead (Uttama Anga). It regulates central nervous system impulses, corrects hormonal imbalances, and provides profound mental clarity.',
+        coverImage: '/images/old_site/slider-1.jpg',
+        durationMinutes: 45,
+        recommendedDays: 14,
+        indications: ['Chronic Headache', 'Insomnia', 'Mental Stress & Anxiety', 'Hypertension'],
+        benefits: ['Calms central nervous system', 'Improves sleep quality', 'Reduces mental fatigue'],
+        doctorIds: [createdDoctors[0]._id, createdDoctors[1]._id],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
         status: 'published',
-      });
-    }
-    const createdTreatments = await Treatment.insertMany(treatmentSeedDocs);
-
-    // Link conditions with treatments
-    console.log('Linking conditions to recommended treatments...');
-    for (let i = 0; i < createdConditions.length; i++) {
-      const t1 = createdTreatments[i % createdTreatments.length]._id;
-      const t2 = createdTreatments[(i + 2) % createdTreatments.length]._id;
-      const d1 = createdDoctors[i % createdDoctors.length]._id;
-      await Condition.findByIdAndUpdate(createdConditions[i]._id, {
-        recommendedTreatmentIds: [t1, t2],
-        specialistDoctorIds: [d1],
-      });
-    }
+      },
+      {
+        title: 'Takradhara (Medicated Buttermilk Pour)',
+        slug: 'takradhara-medicated-buttermilk-pour',
+        category: 'Dhara',
+        malayalam: 'തക്രധാര',
+        shortDescription: 'Pouring of medicated buttermilk over head to treat Psoriasis, Hypertension, and Heat-related Doshas.',
+        fullDescription: 'Takradhara involves pouring specially prepared herbal buttermilk over the forehead. Highly effective in Psoriasis, Eczema, burning sensation in Diabetes Mellitus, and stress-induced cardiac disorders.',
+        coverImage: '/images/old_site/dept-kayachikitsa.jpg',
+        durationMinutes: 45,
+        recommendedDays: 14,
+        indications: ['Psoriasis & Eczema', 'Hypertension', 'Burning Sensation in Feet', 'Loss of Memory'],
+        benefits: ['Cools aggravated Pitta', 'Relieves skin scaling', 'Improves concentration'],
+        doctorIds: [createdDoctors[1]._id, createdDoctors[6]._id],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Amla Dhara',
+        slug: 'amla-dhara',
+        category: 'Dhara',
+        malayalam: 'ആമ്ലധാര',
+        shortDescription: 'Warm fermented herbal liquid pour for spinal deformities, paralysis, and strain disorders.',
+        fullDescription: 'Amla Dhara yields satisfactory results in Hemiplegia, Paraplegia, Lordosis, Scoliosis, and stressful disorders of the spine.',
+        coverImage: '/images/old_site/dept-stroke.jpg',
+        durationMinutes: 45,
+        recommendedDays: 14,
+        indications: ['Hemiplegia & Paraplegia', 'Lordosis & Scoliosis', 'Spinal Strain'],
+        benefits: ['Relieves spinal nerve stiffness', 'Promotes nerve regeneration'],
+        doctorIds: [createdDoctors[0]._id, createdDoctors[3]._id],
+        assignedBranchIds: [kattakadaBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Ksheera Dhara',
+        slug: 'ksheera-dhara',
+        category: 'Dhara',
+        malayalam: 'ക്ഷീരധാര',
+        shortDescription: 'Pouring of herbal medicated milk for headache, eye strain, and premature hair graying.',
+        fullDescription: 'Ksheera Dhara uses pure milk decoctions infused with Ayurvedic herbs to soothe headaches, eye ailments, and strain-induced insomnia.',
+        coverImage: '/images/old_site/ayurveda-health1.jpg',
+        durationMinutes: 45,
+        recommendedDays: 7,
+        indications: ['Headache of All Types', 'Eye Ailments', 'Premature Hair Graying', 'Insomnia'],
+        benefits: ['Nourishes sensory organs', 'Reduces cranial inflammation'],
+        doctorIds: [createdDoctors[1]._id, createdDoctors[2]._id],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Kshara Sutra Ligation',
+        slug: 'kshara-sutra-ligation',
+        category: 'Proctology',
+        malayalam: 'ക്ഷാരസൂത്ര ചികിത്സ',
+        shortDescription: 'Pioneering Ayurvedic non-surgical surgical technique for permanent cure of Fistula-in-Ano and Piles.',
+        fullDescription: 'Kshara Sutra is a minimally invasive parasurgical procedure utilizing medicated linen threads coated with alkaline plant extracts for excision of fistula tracks and piles without surgical cutting.',
+        coverImage: '/images/old_site/dept-proctology.jpg',
+        durationMinutes: 30,
+        recommendedDays: 7,
+        indications: ['Anal Fistula (Bhagandara)', 'Piles (Arshas)', 'Anal Fissure (Parikartika)'],
+        benefits: ['Zero recurrence rate', 'No surgical scars', 'Daycare procedure'],
+        doctorIds: [createdDoctors[5]._id],
+        assignedBranchIds: [kattakadaBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Abhyangam (Warm Oil Sync Massage)',
+        slug: 'abhyangam-warm-oil-sync-massage',
+        category: 'Panchakarma',
+        malayalam: 'അഭ്യംഗം',
+        shortDescription: 'Rhythmic 4-hand synchronization body massage using warm dosha-specific oils.',
+        fullDescription: 'Classical full-body warm oil massage performed in 7 postural positions to liquefy toxins, lubricate joints, and slow degenerative aging.',
+        coverImage: '/images/old_site/dept-panchakarma.jpg',
+        durationMinutes: 60,
+        recommendedDays: 7,
+        indications: ['Body Pain', 'Vata Imbalance', 'Skin Dryness', 'Fatigue'],
+        benefits: ['Enhances lymphatic drainage', 'Improves muscle tone'],
+        doctorIds: [createdDoctors[0]._id, createdDoctors[1]._id],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Kadi Vasthi (Lumbar Spine Pool)',
+        slug: 'kadi-vasthi-lumbar-spine-pool',
+        category: 'Vasthi',
+        malayalam: 'കടിവസ്തി',
+        shortDescription: 'Retention of warm medicated oil over the lumbar spine for disc herniation and low back pain.',
+        fullDescription: 'A herbal dough ring is placed on the lower back and filled with warm medicated oils to nourish intervertebral discs and relieve nerve compression.',
+        coverImage: '/images/old_site/dept-joint.jpg',
+        durationMinutes: 45,
+        recommendedDays: 7,
+        indications: ['Lumbar Spondylosis', 'Sciatica', 'Slip Disc', 'Lower Back Stiffness'],
+        benefits: ['Strengthens lumbar vertebrae', 'Relieves sciatic nerve pain'],
+        doctorIds: [createdDoctors[0]._id, createdDoctors[4]._id],
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      }
+    ]);
 
     // ==========================================
-    // 7. CARE PACKAGES (60 Care Packages)
+    // 7. AUTHENTIC HEALTH CONDITIONS
     // ==========================================
-    console.log('7. Seeding 60 Care Packages with pricing & inclusions...');
-    const packageSeedDocs = [];
-    for (let i = 0; i < 60; i++) {
-      const title = `Ayurvedic Package #${i + 1}: ${deptTitles[i % deptTitles.length]} Inpatient Program`;
-      const slug = `package-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      const price = 25000 + i * 1200;
+    console.log('7. Seeding Authentic Health Conditions...');
+    await Condition.create([
+      {
+        title: 'Back, Neck & Joint Problems',
+        slug: 'back-neck-joint-problems',
+        category: 'Spine & Joint',
+        shortDescription: 'Degenerative joint and spine problems caused by diet, posture, lifestyle, and stress.',
+        fullDescription: 'Neck, Back & Joint Problems are caused by degeneration resulting from modern sedentary lifestyle, poor ergonomic posture, dietary errors, and aggravated Vata dosha.',
+        ayurvedicRootCause: 'Vata Aggravation and Asthi-Majja Dhatu Kshaya.',
+        symptoms: ['Lower back stiffness', 'Radiating neck pain', 'Joint swelling & crepitus', 'Restricted mobility'],
+        recommendedTreatmentIds: [createdTreatments[5]._id, createdTreatments[6]._id],
+        specialistDoctorIds: [createdDoctors[0]._id, createdDoctors[4]._id],
+        coverImage: '/images/old_site/dept-joint.jpg',
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Stroke & Post-Stroke Rehabilitation',
+        slug: 'stroke-post-stroke-rehabilitation',
+        category: 'Neurological',
+        shortDescription: 'Comprehensive Ayurvedic rehabilitation for hemiplegia and motor paralysis after stroke.',
+        fullDescription: 'Stroke patients in India are typically left under home care post-acute hospitalization. Susrutha provides specialized inpatient panchakarma and motor rehabilitation.',
+        ayurvedicRootCause: 'Pakshaghata due to acute Vata obstruction in cerebral Srotas.',
+        symptoms: ['One-sided limb weakness', 'Loss of speech clarity', 'Facial asymmetry', 'Muscle atrophy'],
+        recommendedTreatmentIds: [createdTreatments[2]._id, createdTreatments[5]._id],
+        specialistDoctorIds: [createdDoctors[0]._id, createdDoctors[3]._id],
+        coverImage: '/images/old_site/dept-stroke.jpg',
+        assignedBranchIds: [kattakadaBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Rheumatoid Arthritis (Amavata)',
+        slug: 'rheumatoid-arthritis-amavata',
+        category: 'Rheumatology',
+        shortDescription: 'Autoimmune joint disease characterized by systemic inflammation and morning stiffness.',
+        fullDescription: 'Amavata occurs when impaired digestive fire (Agni) creates Ama (toxic residue) which circulates and lodges in joint synovial membranes.',
+        ayurvedicRootCause: 'Ama accumulation circulating with aggravated Vata.',
+        symptoms: ['Morning joint stiffness > 1 hour', 'Symmetrical joint swelling', 'Fatigue and low-grade fever'],
+        recommendedTreatmentIds: [createdTreatments[1]._id, createdTreatments[5]._id],
+        specialistDoctorIds: [createdDoctors[4]._id],
+        coverImage: '/images/old_site/dept-rheumatology.jpg',
+        assignedBranchIds: [kattakadaBranch._id, kowdiarBranch._id],
+        isFeatured: true,
+        status: 'published',
+      },
+      {
+        title: 'Piles & Anal Fistula (Anorectal Care)',
+        slug: 'piles-anal-fistula-anorectal-care',
+        category: 'Proctology',
+        shortDescription: 'Non-surgical Kshara Sutra therapy for permanent cure of hemorrhoids and fistula.',
+        fullDescription: 'Anorectal conditions like Piles and Fistula are treated with high efficacy using Kshara Sutra ligation and internal Kashayams without surgical cutting.',
+        ayurvedicRootCause: 'Mandagni causing chronic constipation and Apana Vayu disturbance.',
+        symptoms: ['Bleeding during defecation', 'Painful anal swelling', 'Pus discharge from fistula tract'],
+        recommendedTreatmentIds: [createdTreatments[4]._id],
+        specialistDoctorIds: [createdDoctors[5]._id],
+        coverImage: '/images/old_site/dept-proctology.jpg',
+        assignedBranchIds: [kattakadaBranch._id],
+        isFeatured: true,
+        status: 'published',
+      }
+    ]);
 
-      packageSeedDocs.push({
-        title,
-        slug,
-        subtitle: `${7 + (i % 3) * 7}-Day Complete Inpatient Recovery & Detox Suite`,
-        durationDays: 7 + (i % 3) * 7,
-        assignedBranchIds: [createdBranches[i % createdBranches.length]._id, createdBranches[(i + 1) % createdBranches.length]._id],
-        overview: `All-inclusive ${7 + (i % 3) * 7}-day inpatient holistic treatment program covering daily Panchakarma therapies, doctor consultations, organic diet, room stay, and herbal medicines.`,
-        inclusions: ['Daily Physician Consultations', '2x Daily Panchakarma Therapies', 'Custom Organic Pathya Diet', 'Accommodation & Room Stay', 'Internal Herbal Medicines'],
-        exclusions: ['Diagnostic Scans & MRI', 'Personal Airport Transfers', 'Attendant Extra Meals'],
-        targetAilments: ['Stress Relief', 'Full Body Detoxification', 'Spine & Joint Care', 'Weight Management'],
-        image: getImg(IMAGES.hospital, i),
-        galleryImages: [getImg(IMAGES.hospital, i), getImg(IMAGES.therapy, i)],
-        price,
-        isFeatured: i < 20,
-        sortOrder: i + 1,
+    // ==========================================
+    // 8. HOSPITAL INFRASTRUCTURE & FACILITIES
+    // ==========================================
+    console.log('8. Seeding Authentic Hospital Infrastructure & Facilities...');
+    await Infrastructure.create([
+      {
+        title: '30-Bed Inpatient Rooms & Deluxe Suites',
+        category: 'ROOMS',
+        branchId: kattakadaBranch._id,
+        description: 'Clean, well-ventilated inpatient rooms equipped with attached washrooms, 24x7 nursing call system, and attendant accommodation.',
+        capacity: 30,
+        image: '/images/old_site/kattakada-hospital.jpg',
+        coverImage: '/images/old_site/kattakada-hospital.jpg',
         status: 'ACTIVE',
-      });
-    }
-    await CarePackage.insertMany(packageSeedDocs);
-
-    // ==========================================
-    // 8. INFRASTRUCTURE & FACILITIES (80 Wings)
-    // ==========================================
-    console.log('8. Seeding 80 Infrastructure Wings & Facility Rooms...');
-    const facCats = ['ROOMS', 'PANCHAKARMA_SUITES', 'OPERATING_THEATRE', 'PHYSIOTHERAPY', 'YOGA_HALL', 'AYUR_VILLAGE', 'OTHER'];
-    const infraSeedDocs = [];
-    for (let i = 0; i < 80; i++) {
-      const title = `Facility Wing #${i + 1} — ${facCats[i % facCats.length]} Block ${String.fromCharCode(65 + (i % 4))}`;
-      infraSeedDocs.push({
-        title,
-        category: facCats[i % facCats.length] as any,
-        branchId: createdBranches[i % createdBranches.length]._id,
-        description: `Modern hospital wing equipped with traditional teak wood Droni therapy tables, AC suites, attached hygienic washrooms, and 24/7 nursing call buttons.`,
-        capacity: 5 + i * 2,
-        image: getImg(IMAGES.hospital, i),
-        coverImage: getImg(IMAGES.hospital, i),
-        galleryImages: [getImg(IMAGES.hospital, i), getImg(IMAGES.therapy, i)],
+      },
+      {
+        title: 'Panchakarma Treatment Rooms & Teak Droni',
+        category: 'PANCHAKARMA_SUITES',
+        branchId: kattakadaBranch._id,
+        description: 'Authentic Kerala panchakarma therapy rooms equipped with traditional carved teak wood Droni tables, oil heating stations, and steam cabinets.',
+        capacity: 12,
+        image: '/images/old_site/dept-panchakarma.jpg',
+        coverImage: '/images/old_site/dept-panchakarma.jpg',
         status: 'ACTIVE',
-      });
-    }
-    await Infrastructure.insertMany(infraSeedDocs);
-
-    // ==========================================
-    // 9. BLOGS & HEALTH ARTICLES (150 Articles)
-    // ==========================================
-    console.log('9. Seeding 150 Health Blogs & Medical Articles...');
-    const blogSeedDocs = [];
-    for (let i = 0; i < 150; i++) {
-      const doc = createdDoctors[i % createdDoctors.length];
-      const title = `Ayurvedic Health Guide #${i + 1}: ${condTitles[i % condTitles.length]} Management`;
-      const slug = `blog-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-
-      blogSeedDocs.push({
-        title,
-        slug,
-        category: deptTitles[i % deptTitles.length],
-        tags: ['Ayurveda', 'Panchakarma', 'Kerala Medicine', 'Wellness'],
-        authorName: doc.name,
-        authorTitle: doc.designation,
-        readTimeMinutes: 4 + (i % 6),
-        excerpt: `Discover authentic Kerala Ayurvedic dietary guidelines, panchakarma treatments, and preventive lifestyle advice for ${condTitles[i % condTitles.length]}.`,
-        content: `### Understanding ${condTitles[i % condTitles.length]} in Ayurveda\n\nAyurveda views body wellness through the harmony of the three Vata, Pitta, and Kapha doshas. When Agni (digestive fire) weakens, metabolic toxins termed Ama accumulate in tissue micro-channels (Srotas).\n\n#### Classical Remedies & Therapies\n1. **Panchakarma Bio-Purification**: Eliminates deep-seated toxins.\n2. **Herbal Formulations**: Kashayams and Arishtams prescribed by qualified Vaidyas.\n3. **Dietary Discipline (Pathya)**: Freshly prepared warm sattvic food.`,
-        coverImage: getImg(IMAGES.nature, i),
-        isFeatured: i < 25,
-        status: 'PUBLISHED',
-      });
-    }
-    await Blog.insertMany(blogSeedDocs);
-
-    // ==========================================
-    // 10. PATIENT TESTIMONIALS (120 Reviews)
-    // ==========================================
-    console.log('10. Seeding 120 Patient Reviews & Video Testimonials...');
-    const patientLocations = ['Trivandrum', 'Kochi', 'Kozhikode', 'Dubai, UAE', 'London, UK', 'New York, USA', 'Bangalore', 'Chennai', 'Mumbai', 'Delhi', 'Abu Dhabi', 'Singapore', 'Melbourne, Australia', 'Doha, Qatar'];
-    const testimonialSeedDocs = [];
-    for (let i = 0; i < 120; i++) {
-      const doc = createdDoctors[i % createdDoctors.length];
-      testimonialSeedDocs.push({
-        patientName: `Patient ${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
-        patientLocation: patientLocations[i % patientLocations.length],
-        treatmentReceived: treatNames[i % treatNames.length],
-        branchId: createdBranches[i % createdBranches.length]._id,
-        rating: 5,
-        reviewText: `I underwent 14 days of inpatient treatment under ${doc.name} at Susrutha Ayurvedhik Hospital. My chronic pain is completely cured, and overall energy is restored! Staff and doctors provided exceptional care.`,
-        patientPhoto: getImg(IMAGES.doctors, i),
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        isFeatured: i < 35,
+      },
+      {
+        title: 'Kshara Sutra Operation Theater',
+        category: 'OPERATING_THEATRE',
+        branchId: kattakadaBranch._id,
+        description: 'Sterile parasurgical operating theatre dedicated to Kshara Sutra anorectal procedures and minor surgical interventions.',
+        capacity: 4,
+        image: '/images/old_site/dept-proctology.jpg',
+        coverImage: '/images/old_site/dept-proctology.jpg',
         status: 'ACTIVE',
-      });
-    }
-    await Testimonial.insertMany(testimonialSeedDocs);
+      },
+      {
+        title: 'Physiotherapy & Neuro Rehab Unit',
+        category: 'PHYSIOTHERAPY',
+        branchId: kattakadaBranch._id,
+        description: 'Complementary physiotherapy and neuro-rehabilitation unit supporting post-stroke and spinal injury recovery.',
+        capacity: 8,
+        image: '/images/old_site/dept-stroke.jpg',
+        coverImage: '/images/old_site/dept-stroke.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Yoga & Meditation Hall',
+        category: 'YOGA_HALL',
+        branchId: kattakadaBranch._id,
+        description: 'Peaceful indoor yoga hall for guided daily morning Pranayama, posture exercises, and mental relaxation.',
+        capacity: 25,
+        image: '/images/old_site/ayurveda-health1.jpg',
+        coverImage: '/images/old_site/ayurveda-health1.jpg',
+        status: 'ACTIVE',
+      },
+      {
+        title: 'Kowdiar Executive Daycare Therapy Suite',
+        category: 'PANCHAKARMA_SUITES',
+        branchId: kowdiarBranch._id,
+        description: 'Executive daycare Panchakarma and Shirodhara suites at Kowdiar satellite OPD outlet.',
+        capacity: 6,
+        image: '/images/old_site/kowdiar-branch.jpg',
+        coverImage: '/images/old_site/kowdiar-branch.jpg',
+        status: 'ACTIVE',
+      }
+    ]);
 
     // ==========================================
-    // 11. ECOSYSTEM PILLARS (50 Pillars)
+    // 9. AFFILIATIONS
     // ==========================================
-    console.log('11. Seeding 50 Ecosystem Pillars...');
-    const pTypes = ['herbal_garden', 'pharmacy_unit', 'research_center', 'academy'];
-    const ecosystemSeedDocs = [];
-    for (let i = 0; i < 50; i++) {
-      const title = `Ecosystem Division #${i + 1} — ${pTypes[i % pTypes.length].replace('_', ' ').toUpperCase()}`;
-      const slug = `ecosystem-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      ecosystemSeedDocs.push({
-        title,
-        slug,
-        pillarType: pTypes[i % pTypes.length],
-        tagline: `Pioneering Division for ${pTypes[i % pTypes.length].replace('_', ' ')} Excellence`,
-        description: `Dedicated department focusing on clinical research, organic botanical cultivation, GMP medicine manufacturing, and Vaidya training.`,
-        coverImage: getImg(IMAGES.nature, i),
-        status: 'published',
-      });
-    }
-    await Ecosystem.insertMany(ecosystemSeedDocs);
-
-    // ==========================================
-    // 12. VIDEOS & TOURS (100 Videos)
-    // ==========================================
-    console.log('12. Seeding 100 Video Features & Tours...');
-    const vCats = ['patient_story', 'doctor_talk', 'facility_tour', 'treatment_demo'];
-    const videoSeedDocs = [];
-    for (let i = 0; i < 100; i++) {
-      const title = `Video Feature #${i + 1}: ${vCats[i % vCats.length].replace('_', ' ').toUpperCase()} (${deptTitles[i % deptTitles.length]})`;
-      const slug = `video-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      videoSeedDocs.push({
-        title,
-        slug,
-        category: vCats[i % vCats.length],
-        youtubeUrl: IMAGES.videos[i % IMAGES.videos.length],
-        videoHost: 'youtube',
-        thumbnailUrl: getImg(IMAGES.hospital, i),
-        duration: `${3 + (i % 8)}:${(10 + (i * 7) % 50).toString().padStart(2, '0')}`,
-        description: `Watch this detailed video presentation introducing ${deptTitles[i % deptTitles.length]} protocols at Susrutha Hospital.`,
-        doctorId: createdDoctors[i % createdDoctors.length]._id,
-        treatmentId: createdTreatments[i % createdTreatments.length]._id,
-        isFeatured: i < 25,
-        sortOrder: i + 1,
-        status: 'published',
-      });
-    }
-    await Video.insertMany(videoSeedDocs);
-
-    // ==========================================
-    // 13. GALLERY ALBUMS (80 Albums)
-    // ==========================================
-    console.log('13. Seeding 80 Photo & Video Gallery Albums...');
-    const gCats = ['infrastructure', 'ayur_village', 'kowdiar_op', 'herbal_garden', 'events', 'treatments'];
-    const gallerySeedDocs = [];
-    for (let i = 0; i < 80; i++) {
-      const title = `Photo Album #${i + 1}: ${gCats[i % gCats.length].replace('_', ' ').toUpperCase()} Showcase`;
-      const slug = `album-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      gallerySeedDocs.push({
-        title,
-        slug,
-        category: gCats[i % gCats.length] as any,
-        coverImage: getImg(IMAGES.hospital, i),
-        description: `High-resolution gallery depicting ${gCats[i % gCats.length]} facilities, therapy rooms, and herbal greenery.`,
-        mediaItems: [
-          { url: getImg(IMAGES.hospital, i), caption: 'Main Campus View', mediaType: 'image', sortOrder: 1 },
-          { url: getImg(IMAGES.therapy, i), caption: 'Therapy Suite View', mediaType: 'image', sortOrder: 2 },
-          { url: getImg(IMAGES.nature, i), caption: 'Herbal Garden View', mediaType: 'image', sortOrder: 3 },
-        ],
-        isFeatured: i < 25,
-        status: 'published',
-      });
-    }
-    await GalleryAlbum.insertMany(gallerySeedDocs);
-
-    // ==========================================
-    // 14. MEDIA FILES (150 Entries)
-    // ==========================================
-    console.log('14. Seeding 150 Media Library Files...');
-    const mediaFileSeedDocs = [];
-    for (let i = 0; i < 150; i++) {
-      mediaFileSeedDocs.push({
-        filename: `susrutha_asset_${i + 100}.jpg`,
-        originalName: `hospital_photo_${i + 1}.jpg`,
-        mimeType: 'image/jpeg',
-        size: 150000 + i * 4500,
-        url: getImg(IMAGES.hospital, i),
-        publicId: `susrutha/uploads/asset_${i + 100}`,
-        folder: i % 3 === 0 ? 'doctors' : i % 2 === 0 ? 'facilities' : 'treatments',
-        altText: `Susrutha Ayurveda Hospital Asset ${i + 1}`,
-        tags: ['hospital', 'ayurveda', 'kerala', 'panchakarma'],
-        dimensions: { width: 1200, height: 800 },
-        uploadedBy: adminUser._id,
-      });
-    }
-    await MediaFile.insertMany(mediaFileSeedDocs);
-
-    // ==========================================
-    // 15. ACCREDITATIONS & AFFILIATIONS (50)
-    // ==========================================
-    console.log('15. Seeding 50 Official Accreditations & Certifications...');
-    const aCats = ['accreditation', 'certification', 'research_partner', 'university'];
-    const affiliationSeedDocs = [];
-    for (let i = 0; i < 50; i++) {
-      affiliationSeedDocs.push({
-        title: `Official Accreditation #${i + 1}: NABH / AYUSH Standard`,
-        category: aCats[i % aCats.length],
-        type: 'Government Accreditation',
-        logoUrl: getImg(IMAGES.nature, i),
-        issuingBody: `Government AYUSH Accreditation Board #${i + 1}`,
+    console.log('9. Seeding Official Affiliations...');
+    await Affiliation.create([
+      {
+        title: 'Asotra Healthcare Inc (Connecting Mind, Body & Soul)',
+        category: 'research_partner',
+        type: 'International Healthcare Collaboration',
+        logoUrl: '/images/old_site/affiliation-asotra.jpg',
+        issuingBody: 'Dr. Satish Asotra (Ayurvedic Practitioner & Physiologist)',
         validityYear: '2026',
-        description: `Official hospital accreditation certifying compliance with NABH Panchakarma hospital clinical safety standards.`,
+        description: 'Collaboration with Dr. Satish Asotra (over 30 years experience in Western Medicine & Healthcare) connecting ancient Ayurvedic wisdom with modern physiological sciences.',
         status: 'published',
-      });
-    }
-    await Affiliation.insertMany(affiliationSeedDocs);
+      }
+    ]);
 
     // ==========================================
-    // 16. PRESS RELEASES & NEWS (80 Events)
+    // 10. AUTHENTIC PHOTO GALLERY ALBUM
     // ==========================================
-    console.log('16. Seeding 80 Press Releases & News Clippings...');
-    const pTypes2 = ['press_release', 'newspaper_clipping', 'tv_feature', 'event', 'award'];
-    const newsSeedDocs = [];
-    for (let i = 0; i < 80; i++) {
-      const title = `Media Feature #${i + 1}: Susrutha Ayurveda Expands Inpatient Services`;
-      const slug = `news-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${i + 1}`;
-      newsSeedDocs.push({
-        title,
-        slug,
-        type: pTypes2[i % pTypes2.length],
-        publicationType: 'newspaper',
-        publisherName: i % 2 === 0 ? 'Malayala Manorama' : 'The Hindu Medical Special',
-        articleUrl: 'https://thehindu.com',
-        summary: `Susrutha Ayurveda Hospital introduces advanced research-backed Panchakarma clinical protocols.`,
-        content: `Detailed media report highlighting patient outcomes and international panchakarma admissions at Susrutha Hospital...`,
-        coverImage: getImg(IMAGES.hospital, i),
-        isFeatured: i < 20,
-        status: 'published',
+    console.log('10. Seeding Authentic Kowdiar Inauguration Photo Gallery Album...');
+    const kowdiarPhotos = [];
+    for (let i = 1; i <= 36; i++) {
+      const num = String(i).padStart(2, '0');
+      kowdiarPhotos.push({
+        title: `Kowdiar Center Inauguration Photo #${i}`,
+        imageUrl: `/images/old_site/kowdiar/${num}-large.jpg`,
+        thumbnailUrl: `/images/old_site/kowdiar/${num}-small.jpg`,
+        caption: `Highlights from the inaugural ceremony of Susrutha Panchakarma Hospital Kowdiar OP Outlet (#${i}).`,
       });
     }
-    await NewsEvent.insertMany(newsSeedDocs);
+
+    await GalleryAlbum.create({
+      title: 'Kowdiar Center Inauguration',
+      slug: 'kowdiar-center-inauguration',
+      description: 'Official inauguration ceremony of Susrutha Panchakarma Hospital OP Outlet at Pipelane Road, Kowdiar, Trivandrum.',
+      coverImage: '/images/old_site/kowdiar/06-large.jpg',
+      photos: kowdiarPhotos,
+      branchId: kowdiarBranch._id,
+      eventDate: new Date('2022-06-01'),
+      status: 'published',
+    });
 
     // ==========================================
-    // 17. FAQS (120 FAQs)
+    // 11. AUTHENTIC VIDEOS
     // ==========================================
-    console.log('17. Seeding 120 Categorized FAQs...');
-    const faqSeedDocs = [];
-    for (let i = 0; i < 120; i++) {
-      faqSeedDocs.push({
-        question: `Question #${i + 1}: What should I expect during a ${deptTitles[i % deptTitles.length]} consultation?`,
-        answer: `Our senior Vaidya will perform Nadi Pariksha (pulse diagnosis), assess your Prakriti (body constitution), review past medical records, and prescribe customized Panchakarma therapies.`,
-        category: i % 3 === 0 ? 'PANCHAKARMA' : i % 2 === 0 ? 'ADMISSION' : 'INSURANCE',
-        sortOrder: i + 1,
+    console.log('11. Seeding Authentic Video Gallery...');
+    await Video.create([
+      {
+        title: 'Susrutha Panchakarma Hospital Introduction & Clinical Overview',
+        slug: 'susrutha-panchakarma-hospital-introduction',
+        youtubeId: 'RB_zH0kH9xs',
+        youtubeUrl: 'https://www.youtube.com/embed/RB_zH0kH9xs',
+        videoUrl: 'https://www.youtube.com/watch?v=RB_zH0kH9xs',
+        thumbnailUrl: '/images/old_site/kowdiar/video-poster.jpg',
+        description: 'Comprehensive overview of Susrutha Panchakarma Hospital facilities, expert physician care, and classical Kerala bio-purification treatments.',
+        duration: '03:45',
+        category: 'HOSPITAL_OVERVIEW',
+        isFeatured: true,
+        status: 'published',
+      }
+    ]);
+
+    // ==========================================
+    // 12. AUTHENTIC PATIENT TESTIMONIALS
+    // ==========================================
+    console.log('12. Seeding Authentic Patient Testimonials...');
+    await Testimonial.create([
+      {
+        patientName: 'Arun',
+        patientLocation: 'Kollam, Kerala',
+        rating: 5,
+        reviewText: "I'd been avoiding treatment for chronic Neck Pain for years due to bad past experiences. I made an emergency appointment at Susrutha Panchakarma Hospital and the relief was remarkable.",
+        treatmentReceived: 'Neck Pain Care Package & Griva Vasthi',
+        branchId: kattakadaBranch._id,
+        isFeatured: true,
         status: 'ACTIVE',
-      });
-    }
-    await FAQ.insertMany(faqSeedDocs);
+      },
+      {
+        patientName: 'Arun Kumar',
+        patientLocation: 'Kochi, Kerala',
+        rating: 5,
+        reviewText: 'I am so grateful for the opportunity to come to Susrutha Panchakarma Hospital. The prices are more than fair and my skin condition is already doing much better after Takradhara. Everyone is helpful.',
+        treatmentReceived: 'Psoriasis & Skin Care Package (Takradhara)',
+        branchId: kattakadaBranch._id,
+        isFeatured: true,
+        status: 'ACTIVE',
+      }
+    ]);
 
     // ==========================================
-    // 18. APPOINTMENTS (150 Appointments)
+    // 13. GLOBAL SITE SETTINGS & HERITAGE
     // ==========================================
-    console.log('18. Seeding 150 Patient Appointment Records...');
-    const appointmentSeedDocs = [];
-    for (let i = 0; i < 150; i++) {
-      const doc = createdDoctors[i % createdDoctors.length];
-      const branch = createdBranches[i % createdBranches.length];
-      appointmentSeedDocs.push({
-        appointmentNumber: `APT-2026-${1000 + i}`,
-        patientName: `Patient ${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
-        patientPhone: `+91 94471 ${10000 + i * 137}`,
-        patientEmail: `patient${i + 1}@gmail.com`,
-        branchId: branch._id,
-        doctorId: doc._id,
-        consultationType: i % 2 === 0 ? 'OPD_INPERSON' : 'IPD_ADMISSION',
-        preferredDate: new Date(Date.now() + (i % 15) * 86400000),
-        preferredTimeSlot: i % 2 === 0 ? '10:30 AM' : '04:30 PM',
-        symptomsNote: `Consultation request for chronic pain and Panchakarma treatment package.`,
-        status: i % 4 === 0 ? 'COMPLETED' : i % 2 === 0 ? 'CONFIRMED' : 'PENDING',
-      });
-    }
-    await Appointment.insertMany(appointmentSeedDocs);
-
-    // ==========================================
-    // 19. LEADS & INQUIRIES (150 Leads)
-    // ==========================================
-    console.log('19. Seeding 150 Inquiries & Package Leads...');
-    const leadSeedDocs = [];
-    const leadSources = ['WEBSITE_CONTACT', 'HERO_CALLBACK', 'FOOTER_NEWSLETTER', 'WHATSAPP', 'BOOKING_WIZARD', 'FEEDBACK_FORM'] as const;
-    const leadStatuses = ['NEW', 'CONTACTED', 'SCHEDULED', 'CLOSED'] as const;
-    const leadTypes = ['PACKAGE_BOOKING', 'SINGLE_TREATMENT', 'GENERAL_INQUIRY', 'FEEDBACK_RATING'] as const;
-
-    for (let i = 0; i < 150; i++) {
-      const branch = createdBranches[i % createdBranches.length];
-      leadSeedDocs.push({
-        name: `Inquirer ${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
-        phone: `+91 96566 ${10000 + i * 239}`,
-        email: `enquiry${i + 1}@gmail.com`,
-        subject: `Enquiry regarding ${deptTitles[i % deptTitles.length]} inpatient admission`,
-        message: `Looking for room availability and panchakarma treatment package options at ${branch.name}.`,
-        branchId: branch._id,
-        leadType: leadTypes[i % leadTypes.length],
-        source: leadSources[i % leadSources.length],
-        status: leadStatuses[i % leadStatuses.length],
-      });
-    }
-    await Lead.insertMany(leadSeedDocs);
-
-    // ==========================================
-    // 20. AUDIT LOGS (200 Logs)
-    // ==========================================
-    console.log('20. Seeding 200 System Audit Log Entries...');
-    const auditSeedDocs = [];
-    for (let i = 0; i < 200; i++) {
-      auditSeedDocs.push({
-        user: adminUser._id,
-        userName: adminUser.name,
-        userEmail: adminUser.email,
-        action: i % 3 === 0 ? 'CONTENT_UPDATE' : i % 2 === 0 ? 'APPOINTMENT_SCHEDULED' : 'SYSTEM_CONFIG',
-        module: i % 3 === 0 ? 'CMS' : i % 2 === 0 ? 'APPOINTMENTS' : 'SYSTEM',
-        entityId: `ENTITY_${1000 + i}`,
-        ipAddress: '127.0.0.1',
-        userAgent: 'Susrutha API Engine / Seeder',
-        details: { message: `Automated test execution log #${i + 1}` },
-        timestamp: new Date(Date.now() - i * 3600000),
-      });
-    }
-    await AuditLog.insertMany(auditSeedDocs);
-
-    // ==========================================
-    // 21. GLOBAL SETTINGS
-    // ==========================================
-    console.log('21. Seeding Global Site Settings...');
+    console.log('13. Seeding Global Site Settings & Heritage Data...');
     await Setting.create([
       {
         key: 'GENERAL_SETTINGS',
         value: {
-          hospitalName: 'SUSRUTHA Ayurvedhik Hospital',
-          tagline: 'Research-backed 50+ Branches authentic Kerala Ayurveda hospital campus network',
-          foundedYear: 1986,
-          lineageYear: 1970,
-          emergencyHotline: '+91 96566 56736',
-          whatsappNumber: '+91 96566 56736',
+          hospitalName: 'Susrutha Institute of Ayurvedic Sciences (Research) and Panchakarma Hospital',
+          tagline: 'The Way To Healthy Life Is Through Ayurveda',
+          foundedYear: 1970,
+          founders: ['Sri P. Krishna Pillai (Late)', 'Sri P.K. Pillai (Late)', 'Prof. Dr. Krishnankutty Nair (Late)'],
+          managingDirectors: ['Dr. Krishnakumar K.', 'Dr. Sreeja Krishna S.'],
+          emergencyHotline: '+91 9656656736',
+          mainPhone: '0471-2291027',
           mainEmail: 'info@susruthaayurveda.com',
+          kattakadaAddress: 'Opposite Christian College, Kattakada, Thiruvananthapuram, Kerala - 695572',
+          kowdiarAddress: 'Ground Floor, Urbon Heights, Opposite Income Tax Office, Pipelane Road, Kowdiar, Thiruvananthapuram - 695003',
         },
-        description: 'Hospital name, tagline, hotline, and contact info',
+        description: 'Hospital name, lineage history, key leadership, hotline and contact details',
         isSystem: true,
       },
       {
         key: 'ANNOUNCEMENT_BAR',
         value: {
-          text: 'Authentic Kerala Panchakarma Admissions Open Across 50+ Branches in South India',
+          text: 'Authentic Kerala Panchakarma Admissions & OPD Consultations Open at Kattakada & Kowdiar',
           link: '/packages',
           isEnabled: true,
         },
@@ -836,32 +1087,23 @@ async function seedDatabase() {
     ]);
 
     console.log('=====================================================');
-    console.log('HIGH-CAPACITY LOAD SEEDING COMPLETED SUCCESSFULLY!');
-    console.log('• 50 Hospital Branches & Specialty Clinics');
-    console.log('• 40 Clinical Specialty Departments');
-    console.log('• 100 Doctors with Photos, Schedules, & Fees');
-    console.log('• 100 Health Conditions with FAQs & Symptoms');
-    console.log('• 100 Classical Treatments with Indications & Steps');
-    console.log('• 60 Care Packages with Pricing & Gallery Images');
-    console.log('• 80 Infrastructure Wings & Facility Rooms');
-    console.log('• 150 Health Blogs & Medical Articles');
-    console.log('• 120 Patient Reviews & Testimonials');
-    console.log('• 50 Ecosystem Pillars');
-    console.log('• 100 Videos & Patient Stories');
-    console.log('• 80 Photo & Video Gallery Albums');
-    console.log('• 150 Media Library Files');
-    console.log('• 50 Accreditations & Certifications');
-    console.log('• 80 Press Releases & News Clippings');
-    console.log('• 120 Categorized FAQs');
-    console.log('• 150 Appointments & 150 Patient Leads');
-    console.log('• 200 Audit Log Entries & System Settings');
+    console.log('AUTHENTIC PRODUCTION SEEDING COMPLETED SUCCESSFULLY!');
+    console.log('• 2 Authentic Hospital Branches (Kattakada & Kowdiar)');
+    console.log('• 9 Authentic Susrutha Vaidyas with Timetables');
+    console.log('• 9 Authentic Clinical Departments');
+    console.log('• 12 Authentic Care Packages');
+    console.log('• 7 Authentic Classical Panchakarma & Dhara Treatments');
+    console.log('• 4 Authentic Health Conditions');
+    console.log('• 6 Authentic Hospital Infrastructure Wings');
+    console.log('• 1 Official International Affiliation (Asotra Healthcare)');
+    console.log('• Complete Global Heritage Settings & Emergency Hotlines');
     console.log('=====================================================');
 
     process.exit(0);
   } catch (error) {
-    console.error('Error seeding database:', error);
+    console.error('Error seeding production database:', error);
     process.exit(1);
   }
 }
 
-seedDatabase();
+seedProductionDatabase();

@@ -43,34 +43,87 @@ export async function autoSeedSystemData(): Promise<void> {
     }
 
     // 3. Ensure Global Site Settings exist
-    const generalSetting = await Setting.findOne({ key: 'GENERAL_SETTINGS' });
+    const heroSetting = await Setting.findOne({ key: 'HERO' });
+    if (!heroSetting) {
+      await Setting.create({
+        key: 'HERO',
+        value: {
+          badgeText: 'AUTHENTIC KERALA AYURVEDA HOSPITAL & SANCTUARY',
+          headline: 'Centuries of Classical Healing, Mastered for Modern Wellness',
+          highlightTitle: 'Susrutha Ayurvedhik',
+          subtitle: 'Experience research-backed 40-bed inpatient Panchakarma retreats and specialized clinical care at our serene hospital campus in Kattakada.',
+          bgImageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80',
+          ctaText: 'BOOK CONSULTATION',
+          ctaLink: '/booking',
+          secondaryCtaText: 'EXPLORE SANCTUARY',
+          secondaryCtaLink: '/locations',
+        },
+        description: 'Homepage Hero section content and banner settings',
+        isSystem: true,
+      });
+    }
+
+    const generalSetting = await Setting.findOne({ key: 'GENERAL' });
     if (!generalSetting) {
       await Setting.create({
-        key: 'GENERAL_SETTINGS',
+        key: 'GENERAL',
         value: {
+          brandTitle: 'SUSRUTHA Ayurvedhik Hospital',
           hospitalName: 'SUSRUTHA Ayurvedhik Hospital',
-          tagline: 'Research-backed authentic Kerala Ayurveda hospital campus',
+          tagline: 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
+          phone: '+91 96566 56736',
+          emergencyHotline: '+91 96566 56736',
+          email: 'info@susruthaayurveda.com',
+          mainEmail: 'info@susruthaayurveda.com',
+          whatsappNumber: '+91 96566 56736',
           foundedYear: 1986,
           lineageYear: 1970,
-          emergencyHotline: '+91 96566 56736',
-          whatsappNumber: '+91 96566 56736',
-          mainEmail: 'info@susruthaayurveda.com',
         },
         description: 'Hospital name, tagline, hotline, and contact info',
         isSystem: true,
       });
     }
 
-    const announcementSetting = await Setting.findOne({ key: 'ANNOUNCEMENT_BAR' });
+    const announcementSetting = await Setting.findOne({ key: 'ANNOUNCEMENT' });
     if (!announcementSetting) {
       await Setting.create({
-        key: 'ANNOUNCEMENT_BAR',
+        key: 'ANNOUNCEMENT',
         value: {
-          text: 'Authentic Kerala Panchakarma Admissions Open',
+          text: 'Authentic Kerala Panchakarma Admissions Open — 40-Bed Campus at Kattakada',
           link: '/packages',
           isEnabled: true,
         },
         description: 'Top header announcement banner text and link',
+        isSystem: true,
+      });
+    }
+
+    const socialSetting = await Setting.findOne({ key: 'SOCIAL' });
+    if (!socialSetting) {
+      await Setting.create({
+        key: 'SOCIAL',
+        value: {
+          facebook: 'https://facebook.com/susruthaayurveda',
+          instagram: 'https://instagram.com/susruthaayurveda',
+          youtube: 'https://youtube.com/@susruthaayurveda',
+          twitter: 'https://twitter.com/susruthaayurveda',
+          linkedin: 'https://linkedin.com/company/susruthaayurveda',
+        },
+        description: 'Official social media handles and channel URLs',
+        isSystem: true,
+      });
+    }
+
+    const seoSetting = await Setting.findOne({ key: 'SEO' });
+    if (!seoSetting) {
+      await Setting.create({
+        key: 'SEO',
+        value: {
+          metaTitle: 'Susrutha Ayurveda — Authentic Kerala Ayurveda Hospital & Panchakarma Centre',
+          metaDescription: 'Research-backed 40-bed inpatient Ayurveda hospital at Kattakada with city OP at Kowdiar. Classical healing treatments & expert doctors.',
+          metaKeywords: 'Ayurveda hospital, Panchakarma Kerala, Susrutha Ayurveda, Kerala wellness retreat, Ayurvedic clinical treatments',
+        },
+        description: 'Default search engine optimization meta tags',
         isSystem: true,
       });
     }

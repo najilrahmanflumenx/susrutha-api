@@ -9,6 +9,30 @@ export class SettingController {
     settings.forEach((s) => {
       settingsMap[s.key] = s.value;
     });
+
+    if (settingsMap['GENERAL_SETTINGS'] && !settingsMap['GENERAL']) {
+      settingsMap['GENERAL'] = {
+        brandTitle: settingsMap['GENERAL_SETTINGS'].hospitalName || 'SUSRUTHA Ayurvedhik Hospital',
+        hospitalName: settingsMap['GENERAL_SETTINGS'].hospitalName || 'SUSRUTHA Ayurvedhik Hospital',
+        tagline: settingsMap['GENERAL_SETTINGS'].tagline || 'Research-backed 40-bed authentic Kerala Ayurveda hospital campus',
+        phone: settingsMap['GENERAL_SETTINGS'].emergencyHotline || '+91 96566 56736',
+        emergencyHotline: settingsMap['GENERAL_SETTINGS'].emergencyHotline || '+91 96566 56736',
+        email: settingsMap['GENERAL_SETTINGS'].mainEmail || 'info@susruthaayurveda.com',
+        mainEmail: settingsMap['GENERAL_SETTINGS'].mainEmail || 'info@susruthaayurveda.com',
+        whatsappNumber: settingsMap['GENERAL_SETTINGS'].whatsappNumber || '+91 96566 56736',
+        foundedYear: settingsMap['GENERAL_SETTINGS'].foundedYear || 1986,
+        lineageYear: settingsMap['GENERAL_SETTINGS'].lineageYear || 1970,
+      };
+    }
+
+    if (settingsMap['ANNOUNCEMENT_BAR'] && !settingsMap['ANNOUNCEMENT']) {
+      settingsMap['ANNOUNCEMENT'] = {
+        text: settingsMap['ANNOUNCEMENT_BAR'].text || '',
+        link: settingsMap['ANNOUNCEMENT_BAR'].link || '',
+        isEnabled: settingsMap['ANNOUNCEMENT_BAR'].isEnabled ?? true,
+      };
+    }
+
     return res.status(200).json(ApiResponse.success(settingsMap, 'Settings fetched successfully'));
   }
 
@@ -53,6 +77,14 @@ export class SettingController {
     allSettings.forEach((s) => {
       settingsMap[s.key] = s.value;
     });
+
+    if (settingsMap['GENERAL_SETTINGS'] && !settingsMap['GENERAL']) {
+      settingsMap['GENERAL'] = settingsMap['GENERAL_SETTINGS'];
+    }
+    if (settingsMap['ANNOUNCEMENT_BAR'] && !settingsMap['ANNOUNCEMENT']) {
+      settingsMap['ANNOUNCEMENT'] = settingsMap['ANNOUNCEMENT_BAR'];
+    }
+
     return res.status(200).json(ApiResponse.success(settingsMap, 'Settings updated successfully'));
   }
 }
