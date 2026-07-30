@@ -267,8 +267,8 @@ export class PublicController {
         query.$or = [{ name: regex }, { designation: regex }, { specialties: regex }, { qualifications: regex }];
       }
 
-      const isAll = req.query.all === 'true' || reqLimit === '0' || reqLimit === 'all';
-      const limit = isAll ? 1000 : reqLimit ? parseInt(reqLimit as string, 10) : 50;
+      const parsedLimit = reqLimit ? parseInt(reqLimit as string, 10) : 12;
+      const limit = Math.min(Math.max(isNaN(parsedLimit) ? 12 : parsedLimit, 1), 50);
       const page = reqPage ? parseInt(reqPage as string, 10) : 1;
       const skip = (page - 1) * limit;
 
