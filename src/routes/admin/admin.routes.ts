@@ -105,112 +105,112 @@ router.get('/dashboard', asyncHandler(async (req: Request, res: Response) => {
 
 // Core CMS Entities
 router.get('/branches', asyncHandler(BranchController.getAllBranches));
-router.post('/branches', asyncHandler(BranchController.createBranch));
-router.put('/branches/:id', asyncHandler(BranchController.updateBranch));
-router.delete('/branches/:id', asyncHandler(BranchController.deleteBranch));
+router.post('/branches', requirePermission('branches:write'), asyncHandler(BranchController.createBranch));
+router.put('/branches/:id', requirePermission('branches:write'), asyncHandler(BranchController.updateBranch));
+router.delete('/branches/:id', requirePermission('branches:write'), asyncHandler(BranchController.deleteBranch));
 
 router.get('/doctors', asyncHandler(DoctorController.getAllDoctors));
-router.post('/doctors', asyncHandler(DoctorController.createDoctor));
-router.put('/doctors/:id', asyncHandler(DoctorController.updateDoctor));
-router.delete('/doctors/:id', asyncHandler(DoctorController.deleteDoctor));
+router.post('/doctors', requirePermission('doctors:write'), asyncHandler(DoctorController.createDoctor));
+router.put('/doctors/:id', requirePermission('doctors:write'), asyncHandler(DoctorController.updateDoctor));
+router.delete('/doctors/:id', requirePermission('doctors:write'), asyncHandler(DoctorController.deleteDoctor));
 
 router.get('/departments', asyncHandler(DepartmentController.getAllDepartments));
-router.post('/departments', asyncHandler(DepartmentController.createDepartment));
-router.put('/departments/:id', asyncHandler(DepartmentController.updateDepartment));
-router.delete('/departments/:id', asyncHandler(DepartmentController.deleteDepartment));
+router.post('/departments', requirePermission('departments:write'), asyncHandler(DepartmentController.createDepartment));
+router.put('/departments/:id', requirePermission('departments:write'), asyncHandler(DepartmentController.updateDepartment));
+router.delete('/departments/:id', requirePermission('departments:write'), asyncHandler(DepartmentController.deleteDepartment));
 
 router.get('/appointments', asyncHandler(AppointmentController.getAllAppointments));
 router.get('/appointments/:id', asyncHandler(AppointmentController.getAppointmentById));
-router.post('/appointments', asyncHandler(AppointmentController.createAppointment));
-router.put('/appointments/:id', asyncHandler(AppointmentController.updateAppointment));
-router.delete('/appointments/:id', asyncHandler(AppointmentController.deleteAppointment));
+router.post('/appointments', requirePermission('appointments:write'), asyncHandler(AppointmentController.createAppointment));
+router.put('/appointments/:id', requirePermission('appointments:write'), asyncHandler(AppointmentController.updateAppointment));
+router.delete('/appointments/:id', requirePermission('appointments:write'), asyncHandler(AppointmentController.deleteAppointment));
 
 router.get('/packages', asyncHandler(CarePackageController.getAllPackages));
-router.post('/packages', asyncHandler(CarePackageController.createPackage));
-router.put('/packages/:id', asyncHandler(CarePackageController.updatePackage));
-router.delete('/packages/:id', asyncHandler(CarePackageController.deletePackage));
+router.post('/packages', requirePermission('packages:write'), asyncHandler(CarePackageController.createPackage));
+router.put('/packages/:id', requirePermission('packages:write'), asyncHandler(CarePackageController.updatePackage));
+router.delete('/packages/:id', requirePermission('packages:write'), asyncHandler(CarePackageController.deletePackage));
 
 router.get('/infrastructure', asyncHandler(InfrastructureController.getAllInfrastructure));
-router.post('/infrastructure', asyncHandler(InfrastructureController.createFacility));
-router.put('/infrastructure/:id', asyncHandler(InfrastructureController.updateFacility));
-router.delete('/infrastructure/:id', asyncHandler(InfrastructureController.deleteFacility));
+router.post('/infrastructure', requirePermission('infrastructure:write'), asyncHandler(InfrastructureController.createFacility));
+router.put('/infrastructure/:id', requirePermission('infrastructure:write'), asyncHandler(InfrastructureController.updateFacility));
+router.delete('/infrastructure/:id', requirePermission('infrastructure:write'), asyncHandler(InfrastructureController.deleteFacility));
 
 router.get('/blogs', asyncHandler(BlogController.getAllBlogs));
-router.post('/blogs', asyncHandler(BlogController.createBlog));
-router.put('/blogs/:id', asyncHandler(BlogController.updateBlog));
-router.delete('/blogs/:id', asyncHandler(BlogController.deleteBlog));
+router.post('/blogs', requirePermission('blogs:write'), asyncHandler(BlogController.createBlog));
+router.put('/blogs/:id', requirePermission('blogs:write'), asyncHandler(BlogController.updateBlog));
+router.delete('/blogs/:id', requirePermission('blogs:write'), asyncHandler(BlogController.deleteBlog));
 
 router.get('/leads', asyncHandler(LeadController.getAllLeads));
-router.post('/leads', asyncHandler(LeadController.createLead));
-router.put('/leads/:id', asyncHandler(LeadController.updateLead));
-router.delete('/leads/:id', asyncHandler(LeadController.deleteLead));
+router.post('/leads', requirePermission('leads:process'), asyncHandler(LeadController.createLead));
+router.put('/leads/:id', requirePermission('leads:process'), asyncHandler(LeadController.updateLead));
+router.delete('/leads/:id', requirePermission('leads:process'), asyncHandler(LeadController.deleteLead));
 
 router.get('/users', asyncHandler(UserController.getAllUsers));
-router.post('/users', asyncHandler(UserController.createUser));
-router.put('/users/:id', asyncHandler(UserController.updateUser));
-router.delete('/users/:id', asyncHandler(UserController.deleteUser));
+router.post('/users', requirePermission('users:write'), asyncHandler(UserController.createUser));
+router.put('/users/:id', requirePermission('users:write'), asyncHandler(UserController.updateUser));
+router.delete('/users/:id', requirePermission('users:write'), asyncHandler(UserController.deleteUser));
 
 router.get('/roles', asyncHandler(RoleController.getAllRoles));
-router.post('/roles', asyncHandler(RoleController.createRole));
-router.put('/roles/:id', asyncHandler(RoleController.updateRole));
-router.delete('/roles/:id', asyncHandler(RoleController.deleteRole));
+router.post('/roles', requirePermission('roles:write'), asyncHandler(RoleController.createRole));
+router.put('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.updateRole));
+router.delete('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.deleteRole));
 
 router.get('/settings', asyncHandler(SettingController.getAllSettings));
-router.post('/settings', asyncHandler(SettingController.updateSetting));
-router.put('/settings', asyncHandler(SettingController.updateSetting));
-router.post('/settings/:key', asyncHandler(SettingController.updateSetting));
-router.put('/settings/:key', asyncHandler(SettingController.updateSetting));
+router.post('/settings', requirePermission('settings:manage'), asyncHandler(SettingController.updateSetting));
+router.put('/settings', requirePermission('settings:manage'), asyncHandler(SettingController.updateSetting));
+router.post('/settings/:key', requirePermission('settings:manage'), asyncHandler(SettingController.updateSetting));
+router.put('/settings/:key', requirePermission('settings:manage'), asyncHandler(SettingController.updateSetting));
 
 // New Feature Parity Routes
 router.get('/conditions', asyncHandler(getConditions));
-router.post('/conditions', asyncHandler(createCondition));
-router.put('/conditions/:id', asyncHandler(updateCondition));
-router.delete('/conditions/:id', asyncHandler(deleteCondition));
+router.post('/conditions', requirePermission('conditions:write'), asyncHandler(createCondition));
+router.put('/conditions/:id', requirePermission('conditions:write'), asyncHandler(updateCondition));
+router.delete('/conditions/:id', requirePermission('conditions:write'), asyncHandler(deleteCondition));
 
 router.get('/treatments', asyncHandler(getTreatments));
-router.post('/treatments', asyncHandler(createTreatment));
-router.put('/treatments/:id', asyncHandler(updateTreatment));
-router.delete('/treatments/:id', asyncHandler(deleteTreatment));
+router.post('/treatments', requirePermission('treatments:write'), asyncHandler(createTreatment));
+router.put('/treatments/:id', requirePermission('treatments:write'), asyncHandler(updateTreatment));
+router.delete('/treatments/:id', requirePermission('treatments:write'), asyncHandler(deleteTreatment));
 
 router.get('/ecosystem', asyncHandler(getEcosystemPillars));
-router.post('/ecosystem', asyncHandler(createEcosystemPillar));
-router.put('/ecosystem/:id', asyncHandler(updateEcosystemPillar));
-router.delete('/ecosystem/:id', asyncHandler(deleteEcosystemPillar));
+router.post('/ecosystem', requirePermission('ecosystem:write'), asyncHandler(createEcosystemPillar));
+router.put('/ecosystem/:id', requirePermission('ecosystem:write'), asyncHandler(updateEcosystemPillar));
+router.delete('/ecosystem/:id', requirePermission('ecosystem:write'), asyncHandler(deleteEcosystemPillar));
 
 router.get('/media-coverage', asyncHandler(getNewsEvents));
-router.post('/media-coverage', asyncHandler(createNewsEvent));
-router.put('/media-coverage/:id', asyncHandler(updateNewsEvent));
-router.delete('/media-coverage/:id', asyncHandler(deleteNewsEvent));
+router.post('/media-coverage', requirePermission('media-coverage:write'), asyncHandler(createNewsEvent));
+router.put('/media-coverage/:id', requirePermission('media-coverage:write'), asyncHandler(updateNewsEvent));
+router.delete('/media-coverage/:id', requirePermission('media-coverage:write'), asyncHandler(deleteNewsEvent));
 
 router.get('/news-events', asyncHandler(getNewsEvents));
-router.post('/news-events', asyncHandler(createNewsEvent));
-router.put('/news-events/:id', asyncHandler(updateNewsEvent));
-router.delete('/news-events/:id', asyncHandler(deleteNewsEvent));
+router.post('/news-events', requirePermission('media-coverage:write'), asyncHandler(createNewsEvent));
+router.put('/news-events/:id', requirePermission('media-coverage:write'), asyncHandler(updateNewsEvent));
+router.delete('/news-events/:id', requirePermission('media-coverage:write'), asyncHandler(deleteNewsEvent));
 
 router.get('/videos', asyncHandler(getVideos));
-router.post('/videos', asyncHandler(createVideo));
-router.put('/videos/:id', asyncHandler(updateVideo));
-router.delete('/videos/:id', asyncHandler(deleteVideo));
+router.post('/videos', requirePermission('videos:write'), asyncHandler(createVideo));
+router.put('/videos/:id', requirePermission('videos:write'), asyncHandler(updateVideo));
+router.delete('/videos/:id', requirePermission('videos:write'), asyncHandler(deleteVideo));
 
 router.get('/gallery', asyncHandler(getGalleryAlbums));
-router.post('/gallery', asyncHandler(createGalleryAlbum));
-router.put('/gallery/:id', asyncHandler(updateGalleryAlbum));
-router.delete('/gallery/:id', asyncHandler(deleteGalleryAlbum));
+router.post('/gallery', requirePermission('gallery:write'), asyncHandler(createGalleryAlbum));
+router.put('/gallery/:id', requirePermission('gallery:write'), asyncHandler(updateGalleryAlbum));
+router.delete('/gallery/:id', requirePermission('gallery:write'), asyncHandler(deleteGalleryAlbum));
 
 router.get('/affiliations', asyncHandler(getAffiliations));
-router.post('/affiliations', asyncHandler(createAffiliation));
-router.put('/affiliations/:id', asyncHandler(updateAffiliation));
-router.delete('/affiliations/:id', asyncHandler(deleteAffiliation));
+router.post('/affiliations', requirePermission('media-coverage:write'), asyncHandler(createAffiliation));
+router.put('/affiliations/:id', requirePermission('media-coverage:write'), asyncHandler(updateAffiliation));
+router.delete('/affiliations/:id', requirePermission('media-coverage:write'), asyncHandler(deleteAffiliation));
 
 router.get('/media-library', asyncHandler(getMediaFiles));
-router.post('/media-library', asyncHandler(createMediaFileRecord));
-router.delete('/media-library/:id', asyncHandler(deleteMediaFile));
+router.post('/media-library', requirePermission('media-library:write'), asyncHandler(createMediaFileRecord));
+router.delete('/media-library/:id', requirePermission('media-library:write'), asyncHandler(deleteMediaFile));
 
 // File Upload Endpoint (Images & Videos)
 import { upload } from '../../middlewares/upload.middleware';
 import { optimizeUploadedFile } from '../../utils/fileOptimizer';
 import MediaFile from '../../models/MediaFile.model';
-router.post('/upload', upload.single('file'), asyncHandler(async (req: Request, res: Response) => {
+router.post('/upload', upload.single('file'), requirePermission('media-library:write'), asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
@@ -241,25 +241,13 @@ router.post('/upload', upload.single('file'), asyncHandler(async (req: Request, 
 router.get('/audit-logs', asyncHandler(getAuditLogs));
 
 router.get('/faqs', asyncHandler(getFAQs));
-router.post('/faqs', asyncHandler(createFAQ));
-router.put('/faqs/:id', asyncHandler(updateFAQ));
-router.delete('/faqs/:id', asyncHandler(deleteFAQ));
+router.post('/faqs', requirePermission('faqs:write'), asyncHandler(createFAQ));
+router.put('/faqs/:id', requirePermission('faqs:write'), asyncHandler(updateFAQ));
+router.delete('/faqs/:id', requirePermission('faqs:write'), asyncHandler(deleteFAQ));
 
 router.get('/testimonials', asyncHandler(getTestimonials));
-router.post('/testimonials', asyncHandler(createTestimonial));
-router.put('/testimonials/:id', asyncHandler(updateTestimonial));
-router.delete('/testimonials/:id', asyncHandler(deleteTestimonial));
-
-// Staff User Accounts (CRUD)
-router.get('/users', asyncHandler(UserController.getAllUsers));
-router.post('/users', requirePermission('users:write'), asyncHandler(UserController.createUser));
-router.put('/users/:id', requirePermission('users:write'), asyncHandler(UserController.updateUser));
-router.delete('/users/:id', requirePermission('users:write'), asyncHandler(UserController.deleteUser));
-
-// Roles & Permissions (CRUD)
-router.get('/roles', asyncHandler(RoleController.getAllRoles));
-router.post('/roles', requirePermission('roles:write'), asyncHandler(RoleController.createRole));
-router.put('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.updateRole));
-router.delete('/roles/:id', requirePermission('roles:write'), asyncHandler(RoleController.deleteRole));
+router.post('/testimonials', requirePermission('testimonials:write'), asyncHandler(createTestimonial));
+router.put('/testimonials/:id', requirePermission('testimonials:write'), asyncHandler(updateTestimonial));
+router.delete('/testimonials/:id', requirePermission('testimonials:write'), asyncHandler(deleteTestimonial));
 
 export default router;

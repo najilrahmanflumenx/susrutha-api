@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Role } from '../models/Role.model';
 import { ApiResponse } from '../utils/ApiResponse';
+import { ApiError } from '../utils/ApiError';
 import { logAudit } from '../utils/auditLogger';
 
 export class RoleController {
@@ -26,7 +27,20 @@ export class RoleController {
   }
 
   static async updateRole(req: Request, res: Response) {
-    const updated = await Role.findOneAndUpdate({ _id: req.params.id, isDeleted: { $ne: true } }, req.body, { new: true, runValidators: true });
+    const existing = await Role.findById(req.params.id);
+    if (!existing) throw new ApiError(404, 'Role not found');
+
+    if (existing.name === 'SUPER_ADMIN' || existing.isSystem) {
+      req.body.permissions = ['*'];
+      req.body.name = 'SUPER_ADMIN';
+    }
+
+    const updated = await Role.findOneAndUpdate(
+      { _id: req.params.id, isDeleted: { $ne: true } },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
     await logAudit({
       action: 'ROLE_UPDATED',
       module: 'RBAC',
@@ -42,6 +56,11 @@ export class RoleController {
   }
 
   static async deleteRole(req: Request, res: Response) {
+    const existing = await Role.findById(req.params.id);
+    if (existing && (existing.isSystem || existing.name === 'SUPER_ADMIN')) {
+      throw new ApiError(400, 'Immutable system role (SUPER_ADMIN) cannot be deleted.');
+    }
+
     await Role.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true }, { new: true });
     await logAudit({
       action: 'ROLE_DELETED',

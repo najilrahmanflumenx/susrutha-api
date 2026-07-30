@@ -4,6 +4,7 @@ import { User } from '../models/User.model';
 import { Role } from '../models/Role.model';
 import { Branch } from '../models/Branch.model';
 import { ApiResponse } from '../utils/ApiResponse';
+import { ApiError } from '../utils/ApiError';
 import { logAudit } from '../utils/auditLogger';
 
 export class UserController {
@@ -83,6 +84,9 @@ export class UserController {
   }
 
   static async updateUser(req: Request, res: Response) {
+    const existing = await User.findById(req.params.id).populate('roleId');
+    if (!existing) throw new ApiError(404, 'User account not found');
+
     const payload: any = { ...req.body };
     if (payload.password) {
       payload.passwordHash = await bcrypt.hash(payload.password, 10);
@@ -92,6 +96,12 @@ export class UserController {
       const role = await Role.findOne({ name: payload.roleCode.toUpperCase(), isDeleted: { $ne: true } });
       if (role) payload.roleId = role._id;
       delete payload.roleCode;
+    }
+
+    // Protect root Super Admin user from demotion
+    if (existing.email === 'admin@susruthaayurveda.com') {
+      const superRole = await Role.findOne({ name: 'SUPER_ADMIN' });
+      if (superRole) payload.roleId = superRole._id;
     }
 
     const updated = await User.findOneAndUpdate(
@@ -116,6 +126,11 @@ export class UserController {
   }
 
   static async deleteUser(req: Request, res: Response) {
+    const existing = await User.findById(req.params.id).populate('roleId');
+    if (existing && (existing.email === 'admin@susruthaayurveda.com' || (existing.roleId as any)?.name === 'SUPER_ADMIN')) {
+      throw new ApiError(400, 'Immutable Super Admin user account cannot be deleted.');
+    }
+
     await User.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true }, { new: true });
     
     await logAudit({
