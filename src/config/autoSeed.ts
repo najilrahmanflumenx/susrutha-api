@@ -4,6 +4,8 @@ import { Role } from '../models/Role.model';
 import { Setting } from '../models/Setting.model';
 import { logger } from '../utils/logger';
 
+import AuditLog from '../models/AuditLog.model';
+
 export async function autoSeedSystemData(): Promise<void> {
   try {
     // 1. Ensure Super Admin Role exists
@@ -15,6 +17,7 @@ export async function autoSeedSystemData(): Promise<void> {
         description: 'Unrestricted full access across all hospital branches, CMS content, and system settings.',
         permissions: ['*'],
         isSystem: true,
+        isDeleted: false,
         status: 'ACTIVE',
       });
       logger.info('Created default SUPER_ADMIN system role.');
@@ -23,11 +26,11 @@ export async function autoSeedSystemData(): Promise<void> {
     // 2. Ensure Super Admin User exists
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@susruthaayurveda.com';
     const adminPassword = process.env.ADMIN_PASSWORD || 'SusruthaAdmin2026!';
-    let adminUser = await User.findOne({ email: adminEmail, isDeleted: false });
+    let adminUser = await User.findOne({ email: adminEmail, isDeleted: { $ne: true } });
 
     if (!adminUser) {
       const passwordHash = await bcrypt.hash(adminPassword, 10);
-      await User.create({
+      adminUser = await User.create({
         name: 'Susrutha Super Admin',
         email: adminEmail,
         phone: '+91 96566 56736',
@@ -70,6 +73,38 @@ export async function autoSeedSystemData(): Promise<void> {
         description: 'Top header announcement banner text and link',
         isSystem: true,
       });
+    }
+
+    // 4. Seed initial audit log entries if empty
+    const auditCount = await AuditLog.countDocuments({});
+    if (auditCount === 0) {
+      await AuditLog.create([
+        {
+          user: adminUser._id,
+          userName: adminUser.name || 'Susrutha Super Admin',
+          userEmail: adminEmail,
+          action: 'SYSTEM_BOOTSTRAP',
+          module: 'SYSTEM',
+          entityId: 'ROOT',
+          ipAddress: '127.0.0.1',
+          userAgent: 'Susrutha API Engine',
+          details: { message: 'Database bootstrapped and immutable RBAC audit logging initialized.' },
+          timestamp: new Date(),
+        },
+        {
+          user: adminUser._id,
+          userName: adminUser.name || 'Susrutha Super Admin',
+          userEmail: adminEmail,
+          action: 'ROLE_CONFIGURED',
+          module: 'RBAC',
+          entityId: superAdminRole._id.toString(),
+          ipAddress: '127.0.0.1',
+          userAgent: 'Susrutha API Engine',
+          details: { roleName: 'SUPER_ADMIN', permissions: ['*'] },
+          timestamp: new Date(Date.now() - 3600000),
+        },
+      ]);
+      logger.info('Seeded initial audit activity log entries successfully.');
     }
 
     logger.info('Auto-seed super admin check completed successfully.');

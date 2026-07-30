@@ -4,10 +4,11 @@ import { User } from '../models/User.model';
 import { Role } from '../models/Role.model';
 import { Branch } from '../models/Branch.model';
 import { ApiResponse } from '../utils/ApiResponse';
+import { logAudit } from '../utils/auditLogger';
 
 export class UserController {
   static async getAllUsers(req: Request, res: Response) {
-    const users = await User.find({ isDeleted: false })
+    const users = await User.find({ isDeleted: { $ne: true } })
       .populate('roleId', 'name displayName')
       .populate('assignedBranchIds', 'name code')
       .select('-passwordHash');
@@ -22,7 +23,7 @@ export class UserController {
     delete payload.password;
     payload.passwordHash = await bcrypt.hash(rawPassword, 10);
 
-    // Resolve roleId from roleCode or roleName
+    // Resolve roleId from roleCode or roleName if not provided
     if (!payload.roleId) {
       const roleCode = payload.roleCode || payload.roleName;
       let role = null;
@@ -32,26 +33,26 @@ export class UserController {
             { name: roleCode.toUpperCase() },
             { displayName: { $regex: roleCode, $options: 'i' } },
           ],
-          isDeleted: false,
+          isDeleted: { $ne: true },
         });
       }
       // Fallback: use any active role
-      if (!role) role = await Role.findOne({ isDeleted: false, status: 'ACTIVE' });
+      if (!role) role = await Role.findOne({ isDeleted: { $ne: true }, status: 'ACTIVE' });
       if (role) payload.roleId = role._id;
     }
     delete payload.roleCode;
     delete payload.roleName;
 
-    // Resolve branchScope → assignedBranchIds
+    // Resolve branchScope -> assignedBranchIds
     if (!payload.assignedBranchIds) {
       const branchScope: string = payload.branchScope || 'GLOBAL';
       delete payload.branchScope;
       if (branchScope !== 'GLOBAL') {
-        const branch = await Branch.findOne({ code: branchScope, isDeleted: false });
+        const branch = await Branch.findOne({ code: branchScope, isDeleted: { $ne: true } });
         if (branch) payload.assignedBranchIds = [branch._id];
       } else {
         // GLOBAL = access to all branches
-        const allBranches = await Branch.find({ isDeleted: false }).select('_id');
+        const allBranches = await Branch.find({ isDeleted: { $ne: true } }).select('_id');
         payload.assignedBranchIds = allBranches.map((b: any) => b._id);
       }
     }
@@ -65,6 +66,19 @@ export class UserController {
       .populate('roleId', 'name displayName')
       .populate('assignedBranchIds', 'name code')
       .select('-passwordHash');
+
+    await logAudit({
+      action: 'USER_CREATED',
+      module: 'USERS',
+      entityId: user._id.toString(),
+      details: {
+        summary: `Created new staff user account "${user.name}" (${user.email})`,
+        name: user.name,
+        email: user.email,
+        roleId: user.roleId,
+      },
+    });
+
     return res.status(201).json(ApiResponse.success(populatedUser, 'User created successfully'));
   }
 
@@ -75,22 +89,44 @@ export class UserController {
       delete payload.password;
     }
     if (payload.roleCode && !payload.roleId) {
-      const role = await Role.findOne({ name: payload.roleCode.toUpperCase(), isDeleted: false });
+      const role = await Role.findOne({ name: payload.roleCode.toUpperCase(), isDeleted: { $ne: true } });
       if (role) payload.roleId = role._id;
       delete payload.roleCode;
     }
 
     const updated = await User.findOneAndUpdate(
-      { _id: req.params.id, isDeleted: false },
+      { _id: req.params.id, isDeleted: { $ne: true } },
       payload,
       { new: true, runValidators: true }
     ).populate('roleId', 'name displayName').select('-passwordHash');
+
+    await logAudit({
+      action: 'USER_UPDATED',
+      module: 'USERS',
+      entityId: req.params.id,
+      details: {
+        summary: `Updated user account details for "${updated?.name || req.params.id}"`,
+        modifiedKeys: Object.keys(payload),
+        name: updated?.name,
+        email: updated?.email,
+      },
+    });
 
     return res.status(200).json(ApiResponse.success(updated, 'User updated successfully'));
   }
 
   static async deleteUser(req: Request, res: Response) {
     await User.findOneAndUpdate({ _id: req.params.id }, { isDeleted: true }, { new: true });
+    
+    await logAudit({
+      action: 'USER_DELETED',
+      module: 'USERS',
+      entityId: req.params.id,
+      details: {
+        summary: `Soft-deleted user account (ID: ${req.params.id})`,
+      },
+    });
+
     return res.status(200).json(ApiResponse.success(null, 'User deleted successfully'));
   }
 }
